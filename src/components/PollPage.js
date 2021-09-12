@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-function PollPage({isOpen, setIsOpen, personal, sortBy}) {
+function PollPage({personal, sortBy}) {
   const classes = useStyles();
   const [pollPointer, setPollPointer] = useState(0);
   const {data, getUserData, getDataset, updateDataset, refreshDataset, handleFetchMoreData, isPersonal, setIsPersonal, hasMore, userId, setSortBy} = useSQL();
@@ -43,7 +43,7 @@ function PollPage({isOpen, setIsOpen, personal, sortBy}) {
   useEffect(()=>{
     setIsPersonal(personal);
     setSortBy(sortBy);
-  }, [])
+  }, [personal, sortBy])
 
   useEffect(()=>{
     refreshDataset();
@@ -65,17 +65,17 @@ function PollPage({isOpen, setIsOpen, personal, sortBy}) {
             }
           >
           <Grid container spacing={0} className={classes.gridContainer}>
-            {data.map(({poll_text, gifURL, created_by, created_at, winner, chartData, voteData, poll_id, isVoted_bool, isVoted_option_id, totalVoteCount, comment_count, num_likes, user_liked}, index)=>{
+            {data.map(({poll_text, gifURL, created_by, user_avatar, created_at, winner, chartData, voteData, poll_id, isVoted_bool, isVoted_option_id, totalVoteCount, comment_count, num_likes, user_liked}, index)=>{
               return (
                 <Grid key={index} item xs={12} sm={6} lg={4} className={classes.itemContainer}>
-                  <Poll gifURL={gifURL} key={index} user_id={userId} title={poll_text} created_by={created_by} created_at={created_at} winner={winner} chartData={chartData} data={voteData} poll_id={poll_id} isVoted_bool={isVoted_bool} totalVoteCount={totalVoteCount} comment_count={comment_count} num_likes={num_likes} user_liked={user_liked}/>
+                  <Poll gifURL={gifURL} key={index} user_id={userId} title={poll_text} created_by={created_by} user_avatar={user_avatar} created_at={created_at} winner={winner} chartData={chartData} data={voteData} poll_id={poll_id} isVoted_bool={isVoted_bool} totalVoteCount={totalVoteCount} comment_count={comment_count} num_likes={num_likes} user_liked={user_liked}/>
                 </Grid> 
                 )         
             })}
             </Grid>
         </InfiniteScroll>
       <div className={classes.newPollDialog}>
-      <PollForm user_id={userId} getDataset={getDataset} refreshDataset={refreshDataset} setIsOpen={setIsOpen}/>
+      <PollForm/>
       </div>
     </div>
   );

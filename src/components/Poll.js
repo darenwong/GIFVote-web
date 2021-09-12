@@ -2,7 +2,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
-import {Box, Button, Card, Collapse, Divider, IconButton, List, ListItem, ListItemText, TextField} from '@material-ui/core';
+import {Avatar, Box, Button, Card, Collapse, Divider, IconButton, List, ListItem, ListItemText, ListItemAvatar, TextField, Menu, MenuItem, ListItemIcon} from '@material-ui/core';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
@@ -22,11 +22,18 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import ShareIcon from '@material-ui/icons/Share';
+import ReportProblemIcon from '@material-ui/icons/ReportProblem';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
     marginBottom: "auto"
+  },
+  avatar: {
+    margin: theme.spacing(1)
   },
   bullet: {
     display: 'inline-block',
@@ -79,12 +86,25 @@ const useStyles = makeStyles((theme) => ({
   },
   like: {
     marginRight: "auto",
+    marginLeft: "auto",
     textTransform: "none"
   },
   list: {
     maxHeight: '30vh',
     overflow: 'scroll',
     backgroundColor: '#f5f5f5',
+  },
+  moreButton: {
+    marginLeft: "auto",
+    padding: theme.spacing(0.5)
+  },
+  titleBox: {
+    display: "flex",
+    alignItems: "flex-start"
+  },
+  vote: {
+    marginRight: "auto",
+    textTransform: "none"
   }
 }));
 
@@ -101,11 +121,8 @@ const areEqual = (prev, cur) => {
   return prev.title === cur.title && prev.created_by === cur.created_by && prev.created_at === cur.created_at && prev.user_id===cur.user_id && JSON.stringify(prev.data) == JSON.stringify(cur.data) && prev.poll_id === cur.poll_id && prev.isVoted_bool === cur.isVoted_bool && JSON.stringify(prev.chartData) == JSON.stringify(cur.chartData) && prev.comment_count == cur.comment_count && prev.gifURL == cur.gifURL && prev.num_likes == cur.num_likes && prev.user_liked == cur.user_liked;
 }
 
-const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_id, winner, data, poll_id, isVoted_bool, isVoted_option_id, chartData, totalVoteCount, comment_count, num_likes, user_liked}) => {
+const Poll = React.memo(({gifURL, addCount, title, created_by, user_avatar, created_at, user_id, winner, data, poll_id, isVoted_bool, isVoted_option_id, chartData, totalVoteCount, comment_count, num_likes, user_liked}) => {
   const classes = useStyles();
-  const [expanded, setExpanded] = useState(false);
-  const [comments, setComments] = useState([]);
-  const [comment, setComment] = useState("");
   const {loginWithRedirect, isAuthenticated} = useAuth0();
   const [signInOpen, setSignInOpen, signInMsg, setSignInMsg] = useSignIn();
   const videoRef = useRef(null);
@@ -134,10 +151,6 @@ const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_
     console.log("voted", option_id, result);
   };
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
-
   const getDate = (date) => {
     const a = new Date(date);
     const b = new Date();
@@ -155,6 +168,115 @@ const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_
     else {return Math.round(day_diff/365)+"y"}
   }
 
+
+  return (
+    <Card className={classes.root} variant="outlined">
+      <CardContent>
+        <Box className={classes.titleBox}>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar alt={"Guest"} className={classes.avatar} src={user_avatar}>
+                <AccountCircle />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={title} secondary={created_by +" "+getDate(created_at)+" ago"}/>
+          </ListItem>
+          <OptionDropdown/>
+        </Box>
+      </CardContent>
+        <video width="90%" height="auto" loop muted autoPlay playsInline>
+          <source src={gifURL}/>
+        </video>
+      {isVoted_bool==1 && 
+        <CardContent className={classes.barChart}>
+          <BarChart data={chartData}/>
+        </CardContent>
+      }
+      {isVoted_bool==2 &&
+        <List component="nav" aria-label="main choices">
+          {data.map(({text, option_id}, index)=>
+            <ListItem key={index} button onClick={(event)=>handleVote(event, option_id)}>
+              <ListItemText primary={text} inset/>
+            </ListItem>
+          )}
+        </List>
+      }
+      <Box className={classes.buttonGroup}>
+        {isVoted_bool==0 &&
+            data.map(({text, option_id}, index)=>
+              <Button key={index} variant="outlined" color="primary" className={classes.button} onClick={(event)=>handleVote(event, option_id)}>
+                {text}
+              </Button>
+            )
+        }
+      </Box>
+      <Divider/>
+      <LikeComments poll_id={poll_id} user_id={user_id} totalVoteCount={totalVoteCount} user_liked={user_liked} num_likes={num_likes} comment_count={comment_count} getDate={getDate}/>
+    </Card>
+  );
+}, areEqual);
+export default Poll;
+
+const OptionDropdown = () => {
+  const classes = useStyles();  
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (  
+    <>
+      <IconButton className={classes.moreButton} onClick={handleClick}>
+        <MoreVertIcon/>
+      </IconButton>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        {false &&
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+            <ShareIcon/>
+          </ListItemIcon>
+          <ListItemText>Share</ListItemText>
+        </MenuItem>
+        }
+        <MenuItem>
+          <Button
+          href="mailto:gifvote0@gmail.com" style={{textTransform:"none"}}>
+          <ListItemIcon>
+            <ReportProblemIcon/>
+          </ListItemIcon>
+          <ListItemText>Report</ListItemText>
+          </Button>
+        </MenuItem>
+      </Menu>
+    </>
+  )
+}
+
+const LikeComments = ({poll_id, user_id, totalVoteCount, user_liked, num_likes, comment_count, getDate}) => {
+  const classes = useStyles();  
+  const [expanded, setExpanded] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [comment, setComment] = useState("");
+  const {loginWithRedirect, isAuthenticated, user} = useAuth0();
+  const [signInOpen, setSignInOpen, signInMsg, setSignInMsg] = useSignIn();
+  const {getComments, submitComment, submitLike} = useSQL();
+
+
+
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
 
   const handleComment = async() => {
     if (expanded == false){
@@ -184,6 +306,7 @@ const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_
     }
   }
 
+
   const handleLike = async() => {
     if (!isAuthenticated){
       setSignInMsg("Sign in to like");
@@ -196,57 +319,14 @@ const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_
   }
 
   return (
-    <Card className={classes.root} variant="outlined">
-      <CardContent>
-        <Typography variant="h6" component="h2" paragraph>
-          {poll_id +". "+ title}
-        </Typography>
-        <Typography variant="subtitle2" color="textSecondary" className={classes.subtitle}>
-          <PersonIcon style={{margin: "10px"}}/>{created_by} <ScheduleIcon style={{margin: "10px"}}/> {getDate(created_at)} <WhatshotIcon style={{margin: "10px"}}/>{totalVoteCount}
-        </Typography>
-      </CardContent>
-        <video width="90%" height="auto" loop muted autoPlay playsInline>
-          <source src={gifURL}/>
-        </video>
-      {false &&
-      <CardActions>
-        <IconButton
-          className={clsx(classes.expand, {
-            [classes.expandOpen]: expanded,
-          })}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="Vote Now"
-        >
-          <ExpandMoreIcon />
-        </IconButton>
-      </CardActions>
-      }
-      {isVoted_bool==1 && 
-        <CardContent className={classes.barChart}>
-          <BarChart data={chartData}/>
-        </CardContent>
-      }
-      {isVoted_bool==2 &&
-        <List component="nav" aria-label="main choices">
-          {data.map(({text, option_id}, index)=>
-            <ListItem key={index} button onClick={(event)=>handleVote(event, option_id)}>
-              <ListItemText primary={text} inset/>
-            </ListItem>
-          )}
-        </List>
-      }
-      <Box className={classes.buttonGroup}>
-        {isVoted_bool==0 &&
-            data.map(({text, option_id}, index)=>
-              <Button key={index} variant="outlined" color="primary" className={classes.button} onClick={(event)=>handleVote(event, option_id)}>
-                {text}
-              </Button>
-            )
-        }
-      </Box>
-      <Divider/>
+    <>
       <CardActions disableSpacing>
+        <Button 
+          className={classes.vote} 
+          startIcon={<WhatshotIcon/>}
+        >
+          {totalVoteCount} {(totalVoteCount == 1)?" Vote":"Votes"}
+        </Button>
         <Button
           className={classes.like} 
           onClick={handleLike}
@@ -265,14 +345,25 @@ const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <List className={classes.list} dense>
-            {comments.map(({user_name, created_at, comment_text}, index)=>
+            {comments.map(({user_name, created_at, user_avatar, comment_text}, index)=>
               <ListItem key={index}>
-                <ListItemText primary={user_name +' ' + getDate(created_at) + ' ago'} secondary={comment_text}/>
+                <ListItemAvatar>
+                  <Avatar src={user_avatar}/>
+                </ListItemAvatar>
+                <ListItemText secondary={user_name +' ' + getDate(created_at) + ' ago'} primary={comment_text}/>
               </ListItem>
             )}           
           </List>
           <Divider/>
           <Box className={classes.commentBox}>
+            {isAuthenticated && 
+              <Avatar src={user.picture} alt={user.name} className={classes.avatar}/>
+            }
+            {!isAuthenticated &&
+              <Avatar alt={"Guest"} className={classes.avatar}>
+                <AccountCircle />
+              </Avatar>
+            }
             <TextField 
               label="Add a comment..." 
               variant="outlined" 
@@ -289,7 +380,6 @@ const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_
           </Box>
         </CardContent>
       </Collapse>
-    </Card>
-  );
-}, areEqual);
-export default Poll;
+    </>
+  )
+}

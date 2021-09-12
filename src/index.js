@@ -1,4 +1,6 @@
 import React from 'react';
+import { createTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
@@ -24,8 +26,17 @@ console.log("default", defaults)
 
 const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
-
 console.log("domain",domain, clientId)
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      // Purple and green play nicely together.
+      main: '#22bfa0',
+    },
+  },
+});
+
 ReactDOM.render(
   <Auth0Provider
     domain = {domain}
@@ -34,7 +45,9 @@ ReactDOM.render(
   >
     <SignInProvider>
       <SQLProvider>
-        <App />
+        <ThemeProvider theme={theme}>
+          <App />
+        </ThemeProvider>
       </SQLProvider>
     </SignInProvider>
   </Auth0Provider>,

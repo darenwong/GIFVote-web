@@ -14,7 +14,8 @@ import { LocalDiningOutlined } from '@material-ui/icons';
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  Link
 } from "react-router-dom";
 import PollPage from './components/PollPage';
 
@@ -55,12 +56,20 @@ function App() {
         <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={()=>setSnackbarOpen(false)} message="Signed In!" TransitionComponent={Slide}/>
 
         <SignInPage/>
-        {isOpen &&
-          <PollPage isOpen={isOpen} setIsOpen={setIsOpen} personal={0} sortBy={"vote"}/>
-        }
-        {!isOpen &&
-          <PollPage isOpen={isOpen} setIsOpen={setIsOpen} personal={1} sortBy={"time"}/>
-        }
+        <Switch>
+          <Route path="/your">
+            <PollPage personal={1} sortBy={"time"}/>
+          </Route>
+          <Route path="/most-like">
+            <PollPage personal={0} sortBy={"like"}/>
+          </Route>
+          <Route path="/latest">
+            <PollPage personal={0} sortBy={"time"}/>
+          </Route>
+          <Route path="/">
+            <PollPage personal={0} sortBy={"vote"}/>
+          </Route>
+        </Switch>
       </div>
     </Router>
   );

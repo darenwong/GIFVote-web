@@ -13,6 +13,7 @@ import AddIcon from '@material-ui/icons/Add';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useSignIn } from '../contexts/SignInContext';
 import { useSQL } from '../contexts/SQLContext.js';
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,14 +34,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function FormDialog({user_id, getDataset, addCount, activateTrig, setIsOpen}) {
+export default function FormDialog() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([{val:"",err:""}, {val:"",err:""}]);
   const [question, setQuestion] = useState({val:"",err:""});
   const {loginWithRedirect, isAuthenticated} = useAuth0();
   const [signInOpen, setSignInOpen, signInMsg, setSignInMsg] = useSignIn();
-  const { refreshDataset, submitPoll} = useSQL();
+  const { refreshDataset, submitPoll, userId} = useSQL();
+  const history = useHistory();
 
   const handleClickOpen = () => {
     if (!isAuthenticated){
@@ -96,20 +98,11 @@ export default function FormDialog({user_id, getDataset, addCount, activateTrig,
       temp[i] = temp[i].val.trim();
     }
 
-    const response = await submitPoll({user_id, question:question.val.trim(), options:JSON.stringify(temp)});
-    fetch(`http://localhost:8080/api-test/?user_id=${user_id}`)
-    .then(res => res.json())
-    .then(
-      (results) => {
-        console.log("test new poll", results);
-      })
+    const response = await submitPoll({user_id: userId, question:question.val.trim(), options:JSON.stringify(temp)});
     if (response=="OK"){
-      setTimeout(()=>{
-        setIsOpen(false);
-        refreshDataset();
-        handleClose();
-
-      }, 1000);
+      refreshDataset();
+      handleClose();
+      history.push("/your");
     }
   };
 

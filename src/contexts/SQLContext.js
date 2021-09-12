@@ -23,9 +23,13 @@ export function SQLProvider({children}){
     if (data.length == 0) {getDataset()}
   },[data])
 
+  useEffect(()=>{
+    refreshDataset();
+  }, [isPersonal, sortBy])
+
   const getUserData = (user) => {
     return new Promise((resolve, reject) =>{
-    fetch(`${ENDPOINT}/api-get-user/?user_email=${user.email}&user_name=${user.nickname}`, {method: 'POST'})
+    fetch(`${ENDPOINT}/api-get-user/?user_email=${user.email}&user_name=${user.nickname}&user_avatar=${user.picture}`, {method: 'POST'})
     .then((res) => {
       console.log(res);
       return res.json();
@@ -50,15 +54,15 @@ export function SQLProvider({children}){
       if (data.length > result.current || !hasMore) {return}
 
       console.log("calling API", result.current)
-      fetch(`${ENDPOINT}/api-vote/?user_id=${userId}&result=${result.current}&isPersonal=${isPersonal}`)
+      fetch(`${ENDPOINT}/api-vote/?user_id=${userId}&result=${result.current}&isPersonal=${isPersonal}&sortBy=${sortBy}`)
       .then(res => res.json())
       .then(
         (results) => {
           console.log("success",results);
           let temp = {};
           for (let i = 0; i < results.length; i++) {
-            let {poll_id, poll_text, gifURL, option_id, option_name, voteCount, totalVoteCount, created_by, created_at, isVoted_bool, isVoted_option_id, comment_count, num_likes, user_liked} = results[i];
-            if (!(poll_id in temp)) {temp[poll_id] = {poll_text, poll_id, gifURL, totalVoteCount, created_by, created_at, options:[],isVoted_bool,isVoted_option_id,comment_count, num_likes, user_liked,
+            let {poll_id, poll_text, gifURL, option_id, option_name, voteCount, totalVoteCount, created_by, user_avatar, created_at, isVoted_bool, isVoted_option_id, comment_count, num_likes, user_liked} = results[i];
+            if (!(poll_id in temp)) {temp[poll_id] = {poll_text, poll_id, gifURL, totalVoteCount, created_by, user_avatar, created_at, options:[],isVoted_bool,isVoted_option_id,comment_count, num_likes, user_liked,
               chartData : {
                 labels: [],
                 datasets: [
@@ -77,7 +81,7 @@ export function SQLProvider({children}){
             temp[poll_id].options.push({option_id, option_name, voteCount});
             temp[poll_id].chartData.labels.push(option_name);
             temp[poll_id].chartData.datasets[0].data.push(Number(voteCount));
-            if (isVoted_option_id == option_id) {temp[poll_id].chartData.datasets[0].backgroundColor.push('rgba(63, 81, 181, 1)');}
+            if (isVoted_option_id == option_id) {temp[poll_id].chartData.datasets[0].backgroundColor.push('rgba(34, 191, 160, 1)');}
             else {temp[poll_id].chartData.datasets[0].backgroundColor.push('rgba(10, 10, 10, 0.5)');}
 
             temp[poll_id].voteData.push({'option_id':option_id,'text':option_name, 'votes':Number(voteCount)});
@@ -90,6 +94,9 @@ export function SQLProvider({children}){
               break;
             case "time":
               arr.sort((a, b)=> b.poll_id - a.poll_id);
+              break;
+            case "like":
+              arr.sort((a, b)=> b.num_likes - a.num_likes);
           }
           setData([...data, ...arr]);
           if (arr.length == 0){
@@ -119,8 +126,8 @@ export function SQLProvider({children}){
           console.log("success",results);
           let temp = {};
           for (let i = 0; i < results.length; i++) {
-            let {poll_id, poll_text, gifURL, option_id, option_name, voteCount, totalVoteCount, created_by, created_at, isVoted_bool, isVoted_option_id, comment_count, num_likes, user_liked} = results[i];
-            if (!(poll_id in temp)) {temp[poll_id] = {poll_text, poll_id, gifURL, totalVoteCount, created_by, created_at, options:[],isVoted_bool,isVoted_option_id,comment_count, num_likes, user_liked,
+            let {poll_id, poll_text, gifURL, option_id, option_name, voteCount, totalVoteCount, created_by, user_avatar, created_at, isVoted_bool, isVoted_option_id, comment_count, num_likes, user_liked} = results[i];
+            if (!(poll_id in temp)) {temp[poll_id] = {poll_text, poll_id, gifURL, totalVoteCount, created_by, user_avatar, created_at, options:[],isVoted_bool,isVoted_option_id,comment_count, num_likes, user_liked,
               chartData : {
                 labels: [],
                 datasets: [
