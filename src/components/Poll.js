@@ -17,6 +17,7 @@ import CommentOutlinedIcon from '@material-ui/icons/CommentOutlined';
 import SendIcon from '@material-ui/icons/Send';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useSignIn } from '../contexts/SignInContext';
+import { useSQL } from '../contexts/SQLContext.js';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
@@ -100,7 +101,7 @@ const areEqual = (prev, cur) => {
   return prev.title === cur.title && prev.created_by === cur.created_by && prev.created_at === cur.created_at && prev.user_id===cur.user_id && JSON.stringify(prev.data) == JSON.stringify(cur.data) && prev.poll_id === cur.poll_id && prev.isVoted_bool === cur.isVoted_bool && JSON.stringify(prev.chartData) == JSON.stringify(cur.chartData) && prev.comment_count == cur.comment_count && prev.gifURL == cur.gifURL && prev.num_likes == cur.num_likes && prev.user_liked == cur.user_liked;
 }
 
-const Poll = React.memo(({getDataset, gifURL, activateTrig, addCount, setPollPointer, updateDataset, title, created_by, created_at, user_id, winner, data, poll_id, isVoted_bool, isVoted_option_id, chartData, totalVoteCount, comment_count, num_likes, user_liked}) => {
+const Poll = React.memo(({gifURL, addCount, title, created_by, created_at, user_id, winner, data, poll_id, isVoted_bool, isVoted_option_id, chartData, totalVoteCount, comment_count, num_likes, user_liked}) => {
   const classes = useStyles();
   const [expanded, setExpanded] = useState(false);
   const [comments, setComments] = useState([]);
@@ -109,6 +110,8 @@ const Poll = React.memo(({getDataset, gifURL, activateTrig, addCount, setPollPoi
   const [signInOpen, setSignInOpen, signInMsg, setSignInMsg] = useSignIn();
   const videoRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const { getUserData, getDataset, updateDataset, refreshDataset, handleFetchMoreData, isPersonal, setIsPersonal, hasMore, userId, setSortBy, submitVote, getComments, submitComment, submitLike} = useSQL();
+
 /*
   useEffect(() => {
     if (isVisible) {
@@ -120,27 +123,15 @@ const Poll = React.memo(({getDataset, gifURL, activateTrig, addCount, setPollPoi
     }
   }, [isVisible]);
 */
-  const handleVote = (event, option_id) => {
+  const handleVote = async(event, option_id) => {
     if (!isAuthenticated){
       setSignInMsg("Sign in to vote");
       setSignInOpen(true);
       return ;
     }
 
-    console.log("voted", option_id);
-    fetch(`http://localhost:8080/api-update/?user_id=${user_id}&poll_id=${poll_id}&option_id=${option_id}`, {method: 'POST'})
-    .then((res) => {
-      console.log(res);
-      res.json();
-    })
-    .then(
-      (results) => { 
-        console.log("update", results)
-        setPollPointer(poll_id);
-        activateTrig();
-      }
-    )
-    .catch(console.log)
+    const result = await submitVote({user_id, poll_id, option_id});
+    console.log("voted", option_id, result);
   };
 
   const handleExpandClick = () => {
@@ -164,66 +155,44 @@ const Poll = React.memo(({getDataset, gifURL, activateTrig, addCount, setPollPoi
     else {return Math.round(day_diff/365)+"y"}
   }
 
-  const getComments = () => {
 
-    fetch(`http://localhost:8080/api-comments/?poll_id=${poll_id}`)
-    .then(res => res.json())
-    .then(
-      (results) => {
-        console.log("comments", results)
+  const handleComment = async() => {
+    if (expanded == false){
+      const results = await getComments(poll_id);
+      if (results) {
         setComments(results);
       }
-    );
-  };
-
-  const handleComment = () => {
-    if (expanded == false){
-      getComments();
     }
 
     setExpanded(!expanded);
   }
 
-  const handleSubmitComment = () => {
+  const handleSubmitComment = async() => {
     if (!isAuthenticated){
       setSignInMsg("Sign in to comment");
       setSignInOpen(true);
       return ;
     }
 
-    fetch(`http://localhost:8080/api-insert-comments/?poll_id=${poll_id}&user_id=${user_id}&comment_text=${comment}`,     {
-      method: 'POST'
-    })
-    .then(res => res.json())
-    .then(
-      (results) => {
-        console.log("comment inserted", results)
-        getComments();
-        setComment("");
-        setPollPointer(poll_id);
-        activateTrig();
+    const response = await submitComment({poll_id, user_id, comment});
+    if (response == "OK"){
+      const result = await getComments(poll_id);
+      if (result) {
+        setComments(result);
       }
-    );
+      setComment("");
+    }
   }
 
-  const handleLike = () => {
+  const handleLike = async() => {
     if (!isAuthenticated){
       setSignInMsg("Sign in to like");
       setSignInOpen(true);
       return ;
     }    
 
-    fetch(`http://localhost:8080/api-insert-like/?poll_id=${poll_id}&user_id=${user_id}`,     {
-      method: 'POST'
-    })
-    .then(res => res.json())
-    .then(
-      (results) => {
-        console.log("like inserted", results);
-        setPollPointer(poll_id);
-        activateTrig();
-      }
-    );
+    const response = await submitLike({poll_id, user_id});
+    console.log("submit like", response)
   }
 
   return (

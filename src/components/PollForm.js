@@ -12,6 +12,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useSignIn } from '../contexts/SignInContext';
+import { useSQL } from '../contexts/SQLContext.js';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,13 +33,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function FormDialog({user_id, getDataset, addCount, activateTrig, setIsOpen, refreshDataset}) {
+export default function FormDialog({user_id, getDataset, addCount, activateTrig, setIsOpen}) {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([{val:"",err:""}, {val:"",err:""}]);
   const [question, setQuestion] = useState({val:"",err:""});
   const {loginWithRedirect, isAuthenticated} = useAuth0();
   const [signInOpen, setSignInOpen, signInMsg, setSignInMsg] = useSignIn();
+  const { refreshDataset, submitPoll} = useSQL();
 
   const handleClickOpen = () => {
     if (!isAuthenticated){
@@ -78,7 +80,7 @@ export default function FormDialog({user_id, getDataset, addCount, activateTrig,
     setOptions(temp);
   }
 
-  const handleCreatePoll = () => {
+  const handleCreatePoll = async() => {
     if (question.val.trim() == ""){setQuestion({val:question.val, err: "Cannot be blank"}); return}
     for (let i = 0; i < options.length; i++){
       if (options[i].val.trim() == ""){
@@ -94,24 +96,21 @@ export default function FormDialog({user_id, getDataset, addCount, activateTrig,
       temp[i] = temp[i].val.trim();
     }
 
-    fetch(`http://localhost:8080/api-new-poll/?user_id=${user_id}&question=${question.val.trim()}&options=${JSON.stringify(temp)}`, 
-    {
-      method: 'POST'
-    })
-    .then((res) => {
-      console.log("hello1",res)
-      return res.json()
-    })
+    const response = await submitPoll({user_id, question:question.val.trim(), options:JSON.stringify(temp)});
+    fetch(`http://localhost:8080/api-test/?user_id=${user_id}`)
+    .then(res => res.json())
     .then(
-      (results) => { 
-        console.log("hello2",results)
+      (results) => {
+        console.log("test new poll", results);
+      })
+    if (response=="OK"){
+      setTimeout(()=>{
         setIsOpen(false);
         refreshDataset();
         handleClose();
-      }
-    )
-    .catch(console.log)
 
+      }, 1000);
+    }
   };
 
   return (

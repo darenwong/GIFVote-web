@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {Auth0Provider} from '@auth0/auth0-react';
 import { SignInProvider } from './contexts/SignInContext';
+import { SQLProvider } from './contexts/SQLContext';
 import { defaults } from 'react-chartjs-2';
 defaults.font.family = [
   '-apple-system',
@@ -32,7 +33,9 @@ ReactDOM.render(
     redirectUri = {window.location.origin}
   >
     <SignInProvider>
-      <App />
+      <SQLProvider>
+        <App />
+      </SQLProvider>
     </SignInProvider>
   </Auth0Provider>,
   document.getElementById('root')
