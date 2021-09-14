@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/GIFVote-web/static/css/main.1b20065a.chunk.css",
-    "main.js": "/GIFVote-web/static/js/main.0a86d0b5.chunk.js",
-    "main.js.map": "/GIFVote-web/static/js/main.0a86d0b5.chunk.js.map",
+    "main.js": "/GIFVote-web/static/js/main.56873294.chunk.js",
+    "main.js.map": "/GIFVote-web/static/js/main.56873294.chunk.js.map",
     "runtime-main.js": "/GIFVote-web/static/js/runtime-main.1c3a3d8b.js",
     "runtime-main.js.map": "/GIFVote-web/static/js/runtime-main.1c3a3d8b.js.map",
     "static/css/2.02fc1a8d.chunk.css": "/GIFVote-web/static/css/2.02fc1a8d.chunk.css",
@@ -20,6 +20,6 @@
     "static/css/2.02fc1a8d.chunk.css",
     "static/js/2.ff2b1106.chunk.js",
     "static/css/main.1b20065a.chunk.css",
-    "static/js/main.0a86d0b5.chunk.js"
+    "static/js/main.56873294.chunk.js"
   ]
 }
