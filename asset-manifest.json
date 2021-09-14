@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/gifvote-web/static/css/main.1b20065a.chunk.css",
+    "main.js": "/gifvote-web/static/js/main.0a86d0b5.chunk.js",
+    "main.js.map": "/gifvote-web/static/js/main.0a86d0b5.chunk.js.map",
+    "runtime-main.js": "/gifvote-web/static/js/runtime-main.ee85cabb.js",
+    "runtime-main.js.map": "/gifvote-web/static/js/runtime-main.ee85cabb.js.map",
+    "static/css/2.02fc1a8d.chunk.css": "/gifvote-web/static/css/2.02fc1a8d.chunk.css",
+    "static/js/2.ff2b1106.chunk.js": "/gifvote-web/static/js/2.ff2b1106.chunk.js",
+    "static/js/2.ff2b1106.chunk.js.map": "/gifvote-web/static/js/2.ff2b1106.chunk.js.map",
+    "static/js/3.d53e7658.chunk.js": "/gifvote-web/static/js/3.d53e7658.chunk.js",
+    "static/js/3.d53e7658.chunk.js.map": "/gifvote-web/static/js/3.d53e7658.chunk.js.map",
+    "index.html": "/gifvote-web/index.html",
+    "static/css/2.02fc1a8d.chunk.css.map": "/gifvote-web/static/css/2.02fc1a8d.chunk.css.map",
+    "static/css/main.1b20065a.chunk.css.map": "/gifvote-web/static/css/main.1b20065a.chunk.css.map",
+    "static/js/2.ff2b1106.chunk.js.LICENSE.txt": "/gifvote-web/static/js/2.ff2b1106.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.ee85cabb.js",
+    "static/css/2.02fc1a8d.chunk.css",
+    "static/js/2.ff2b1106.chunk.js",
+    "static/css/main.1b20065a.chunk.css",
+    "static/js/main.0a86d0b5.chunk.js"
+  ]
+}
