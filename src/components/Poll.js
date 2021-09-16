@@ -43,10 +43,13 @@ import ShareIcon from "@material-ui/icons/Share";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 
+const ENDPOINT = "https://gif-vote.herokuapp.com";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
     marginBottom: "auto",
+    animation: "$fade 2s linear",
   },
   avatar: {
     margin: theme.spacing(1),
@@ -58,6 +61,11 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     fontSize: 14,
+    opacity: 1,
+  },
+  "@keyframes fade": {
+    "0%, 100%": { opacity: 0 },
+    "50%": { opacity: 1 },
   },
   pos: {
     marginBottom: 12,
@@ -125,14 +133,37 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const areEqual = (prev, cur) => {
-  /*
-  console.log("compare", prev.title === cur.title, prev.created_by === cur.created_by, prev.created_at === cur.created_at, prev.user_id===cur.user_id, JSON.stringify(prev.data) === JSON.stringify(cur.data), prev.poll_id === cur.poll_id, prev.isVoted_bool === cur.isVoted_bool, JSON.stringify(prev.chartData) === JSON.stringify(cur.chartData));
-  if (prev.data != cur.data){
-    console.log("data", JSON.stringify(prev.data), JSON.stringify(cur.data), JSON.stringify(prev.data) === JSON.stringify(cur.data));
+  console.log(
+    "compare",
+    prev.title === cur.title,
+    prev.created_by === cur.created_by,
+    prev.created_at === cur.created_at,
+    prev.user_id === cur.user_id,
+    JSON.stringify(prev.data) == JSON.stringify(cur.data),
+    prev.poll_id === cur.poll_id,
+    prev.isVoted_bool === cur.isVoted_bool,
+    JSON.stringify(prev.chartData) == JSON.stringify(cur.chartData),
+    prev.comment_count == cur.comment_count,
+    prev.gifURL == cur.gifURL,
+    prev.num_likes == cur.num_likes,
+    prev.user_liked == cur.user_liked
+  );
+  if (prev.data != cur.data) {
+    console.log(
+      "data",
+      JSON.stringify(prev.data),
+      JSON.stringify(cur.data),
+      JSON.stringify(prev.data) === JSON.stringify(cur.data)
+    );
   }
-  if (prev.chartData != cur.chartData){
-    console.log("chartData", JSON.stringify(prev.chartData), JSON.stringify(cur.chartData), JSON.stringify(prev.chartData) === JSON.stringify(cur.chartData));
-  }*/
+  if (prev.chartData != cur.chartData) {
+    console.log(
+      "chartData",
+      JSON.stringify(prev.chartData),
+      JSON.stringify(cur.chartData),
+      JSON.stringify(prev.chartData) === JSON.stringify(cur.chartData)
+    );
+  }
   //console.log("check addCount",prev.addCount, cur.addCount, prev.addCount === cur.addCount)
   return (
     prev.title === cur.title &&
@@ -171,26 +202,8 @@ const Poll = React.memo(
     user_liked,
   }) => {
     const classes = useStyles();
-    const { loginWithRedirect, isAuthenticated } = useAuth0();
-    const [signInOpen, setSignInOpen, signInMsg, setSignInMsg] = useSignIn();
     const videoRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
-    const {
-      getUserData,
-      getDataset,
-      updateDataset,
-      refreshDataset,
-      handleFetchMoreData,
-      isPersonal,
-      setIsPersonal,
-      hasMore,
-      userId,
-      setSortBy,
-      submitVote,
-      getComments,
-      submitComment,
-      submitLike,
-    } = useSQL();
 
     /*
   useEffect(() => {
@@ -203,54 +216,6 @@ const Poll = React.memo(
     }
   }, [isVisible]);
 */
-    const handleVote = async (event, option_id) => {
-      if (!isAuthenticated) {
-        setSignInMsg("Sign in to vote");
-        setSignInOpen(true);
-        return;
-      }
-
-      const result = await submitVote({ user_id, poll_id, option_id });
-      console.log("voted", option_id, result);
-    };
-
-    const getDate = (date) => {
-      const a = new Date(date);
-      const b = new Date();
-      const utc1 = Date.UTC(
-        a.getFullYear(),
-        a.getMonth(),
-        a.getDate(),
-        a.getHours(),
-        a.getMinutes(),
-        a.getSeconds()
-      );
-      const utc2 = Date.UTC(
-        b.getFullYear(),
-        b.getMonth(),
-        b.getDate(),
-        b.getHours(),
-        b.getMinutes(),
-        b.getSeconds()
-      );
-      const _MS_PER_DAY = 1000 * 60 * 60 * 24;
-
-      let sec_diff = Math.floor((utc2 - utc1) / 1000);
-      let day_diff = Math.floor((utc2 - utc1) / _MS_PER_DAY);
-      if (sec_diff < 60) {
-        return Math.round(sec_diff) + "s";
-      } else if (sec_diff < 3600) {
-        return Math.round(sec_diff / 60) + "m";
-      } else if (sec_diff < 86400) {
-        return Math.round(sec_diff / 86400) + "h";
-      } else if (day_diff < 7) {
-        return Math.round(day_diff) + "d";
-      } else if (day_diff < 365) {
-        return Math.round(day_diff / 7) + "w";
-      } else {
-        return Math.round(day_diff / 365) + "y";
-      }
-    };
 
     return (
       <Card className={classes.root} variant="outlined">
@@ -274,41 +239,14 @@ const Poll = React.memo(
             <OptionDropdown />
           </Box>
         </CardContent>
-        <video width="90%" height="auto" loop muted autoPlay playsInline>
-          <source src={gifURL} />
-        </video>
-        {isVoted_bool == 1 && (
-          <CardContent className={classes.barChart}>
-            <BarChart data={chartData} />
-          </CardContent>
-        )}
-        {isVoted_bool == 2 && (
-          <List component="nav" aria-label="main choices">
-            {data.map(({ text, option_id }, index) => (
-              <ListItem
-                key={index}
-                button
-                onClick={(event) => handleVote(event, option_id)}
-              >
-                <ListItemText primary={text} inset />
-              </ListItem>
-            ))}
-          </List>
-        )}
-        <Box className={classes.buttonGroup}>
-          {isVoted_bool == 0 &&
-            data.map(({ text, option_id }, index) => (
-              <Button
-                key={index}
-                variant="outlined"
-                color="primary"
-                className={classes.button}
-                onClick={(event) => handleVote(event, option_id)}
-              >
-                {text}
-              </Button>
-            ))}
-        </Box>
+        <GIFComponent gifURL={gifURL} />
+        <VoteComponent
+          user_id={user_id}
+          poll_id={poll_id}
+          data={data}
+          isVoted_bool={isVoted_bool}
+          chartData={chartData}
+        />
         <Divider />
         <LikeComments
           poll_id={poll_id}
@@ -317,7 +255,6 @@ const Poll = React.memo(
           user_liked={user_liked}
           num_likes={num_likes}
           comment_count={comment_count}
-          getDate={getDate}
         />
       </Card>
     );
@@ -325,6 +262,95 @@ const Poll = React.memo(
   areEqual
 );
 export default Poll;
+
+const GIFComponent = React.memo(
+  ({ gifURL }) => {
+    return (
+      <video width="90%" height="auto" loop muted autoPlay playsInline>
+        <source src={gifURL} />
+      </video>
+    );
+  },
+  (prev, cur) => {
+    return prev.gifURL == cur.gifURL;
+  }
+);
+
+const VoteComponent = React.memo(
+  ({ data, isVoted_bool, chartData, user_id, poll_id }) => {
+    const classes = useStyles();
+
+    return (
+      <>
+        {isVoted_bool == 1 && (
+          <CardContent className={classes.barChart}>
+            <BarChart data={chartData} />
+          </CardContent>
+        )}
+        <Box className={classes.buttonGroup}>
+          {isVoted_bool == 0 &&
+            data.map(({ text, option_id }, index) => (
+              <VoteButton
+                key={index}
+                text={text}
+                option_id={option_id}
+                user_id={user_id}
+                poll_id={poll_id}
+              />
+            ))}
+        </Box>
+      </>
+    );
+  },
+  (prev, cur) => {
+    return (
+      prev.user_id == cur.user_id &&
+      prev.poll_id == cur.poll_id &&
+      JSON.stringify(prev.data) == JSON.stringify(cur.data) &&
+      prev.isVoted_bool == cur.isVoted_bool &&
+      JSON.stringify(prev.chartData) == JSON.stringify(cur.chartData)
+    );
+  }
+);
+
+const VoteButton = React.memo(
+  ({ text, option_id, user_id, poll_id }) => {
+    const classes = useStyles();
+    const { submitVote } = useSQL();
+    const { isAuthenticated } = useAuth0();
+    const { setSignInOpen, setSignInMsg } = useSignIn();
+
+    const handleVote = async (event, option_id) => {
+      if (!isAuthenticated) {
+        setSignInMsg("Sign in to vote");
+        setSignInOpen(true);
+        return;
+      }
+
+      const result = await submitVote({ user_id, poll_id, option_id });
+      console.log("voted", option_id, result);
+    };
+
+    return (
+      <Button
+        variant="outlined"
+        color="primary"
+        className={classes.button}
+        onClick={(event) => handleVote(event, option_id)}
+      >
+        {text}
+      </Button>
+    );
+  },
+  (prev, cur) => {
+    return (
+      prev.text == cur.text &&
+      prev.option_id == cur.option_id &&
+      prev.user_id == cur.user_id &&
+      prev.poll_id == cur.poll_id
+    );
+  }
+);
 
 const OptionDropdown = () => {
   const classes = useStyles();
@@ -374,146 +400,255 @@ const OptionDropdown = () => {
   );
 };
 
-const LikeComments = ({
-  poll_id,
-  user_id,
-  totalVoteCount,
-  user_liked,
-  num_likes,
-  comment_count,
-  getDate,
-}) => {
-  const classes = useStyles();
-  const [expanded, setExpanded] = useState(false);
-  const [comments, setComments] = useState([]);
+const LikeComments = React.memo(
+  ({
+    poll_id,
+    user_id,
+    totalVoteCount,
+    user_liked,
+    num_likes,
+    comment_count,
+  }) => {
+    const classes = useStyles();
+    const [expanded, setExpanded] = useState(false);
+    const [comments, setComments] = useState([]);
+    const { isAuthenticated, user } = useAuth0();
+    const { setSignInOpen, setSignInMsg } = useSignIn();
+    const { getComments, submitComment } = useSQL();
+
+    const handleComment = async () => {
+      if (expanded == false) {
+        const results = await getComments(poll_id);
+        if (results) {
+          setComments(results);
+        }
+      }
+
+      setExpanded(!expanded);
+    };
+
+    const handleSubmitComment = async (comment) => {
+      if (!isAuthenticated) {
+        setSignInMsg("Sign in to comment");
+        setSignInOpen(true);
+        return;
+      }
+
+      const response = await submitComment({ poll_id, user_id, comment });
+      if (response == "OK") {
+        const result = await getComments(poll_id);
+        if (result) {
+          setComments(result);
+        }
+        //setComment("");
+      }
+    };
+
+    return (
+      <>
+        <CardActions disableSpacing>
+          <Button className={classes.vote} startIcon={<WhatshotIcon />}>
+            {totalVoteCount} {totalVoteCount == 1 ? " Vote" : "Votes"}
+          </Button>
+          <LikeButton
+            user_liked={user_liked}
+            num_likes={num_likes}
+            poll_id={poll_id}
+            user_id={user_id}
+          />
+          <Button
+            className={classes.comment}
+            onClick={handleComment}
+            startIcon={
+              expanded == true ? (
+                <ChatBubbleIcon color="primary" />
+              ) : (
+                <ChatBubbleOutlineIcon />
+              )
+            }
+          >
+            {comment_count} {comment_count == 1 ? " Comment" : "Comments"}
+          </Button>
+        </CardActions>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <CommentList comments={comments} />
+            <Divider />
+            <Box className={classes.commentBox}>
+              {isAuthenticated && (
+                <Avatar
+                  src={user.picture}
+                  alt={user.name}
+                  className={classes.avatar}
+                />
+              )}
+              {!isAuthenticated && (
+                <Avatar alt={"Guest"} className={classes.avatar}>
+                  <AccountCircle />
+                </Avatar>
+              )}
+
+              <CommentInput handleSubmitComment={handleSubmitComment} />
+            </Box>
+          </CardContent>
+        </Collapse>
+      </>
+    );
+  },
+  (prev, cur) => {
+    return (
+      prev.poll_id == cur.poll_id &&
+      prev.user_id == cur.user_id &&
+      prev.totalVoteCount == cur.totalVoteCount &&
+      prev.user_liked == cur.user_liked &&
+      prev.num_likes == cur.num_likes &&
+      prev.comment_count == cur.comment_count
+    );
+  }
+);
+
+const CommentList = React.memo(
+  ({ comments }) => {
+    const classes = useStyles();
+    return (
+      <List className={classes.list} dense>
+        {comments.map(
+          ({ user_name, created_at, user_avatar, comment_text }, index) => (
+            <ListItem key={index}>
+              <ListItemAvatar>
+                <Avatar src={user_avatar} />
+              </ListItemAvatar>
+              <ListItemText
+                secondary={user_name + " " + getDate(created_at) + " ago"}
+                primary={comment_text}
+              />
+            </ListItem>
+          )
+        )}
+      </List>
+    );
+  },
+  (prev, cur) => {
+    return JSON.stringify(prev.comments) == JSON.stringify(cur.comments);
+  }
+);
+
+const CommentInput = ({ handleSubmitComment }) => {
   const [comment, setComment] = useState("");
-  const { loginWithRedirect, isAuthenticated, user } = useAuth0();
-  const [signInOpen, setSignInOpen, signInMsg, setSignInMsg] = useSignIn();
-  const { getComments, submitComment, submitLike } = useSQL();
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
-
-  const handleComment = async () => {
-    if (expanded == false) {
-      const results = await getComments(poll_id);
-      if (results) {
-        setComments(results);
-      }
-    }
-
-    setExpanded(!expanded);
-  };
-
-  const handleSubmitComment = async () => {
-    if (!isAuthenticated) {
-      setSignInMsg("Sign in to comment");
-      setSignInOpen(true);
-      return;
-    }
-
-    const response = await submitComment({ poll_id, user_id, comment });
-    if (response == "OK") {
-      const result = await getComments(poll_id);
-      if (result) {
-        setComments(result);
-      }
-      setComment("");
-    }
-  };
-
-  const handleLike = async () => {
-    if (!isAuthenticated) {
-      setSignInMsg("Sign in to like");
-      setSignInOpen(true);
-      return;
-    }
-
-    const response = await submitLike({ poll_id, user_id });
-    console.log("submit like", response);
-  };
 
   return (
     <>
-      <CardActions disableSpacing>
-        <Button className={classes.vote} startIcon={<WhatshotIcon />}>
-          {totalVoteCount} {totalVoteCount == 1 ? " Vote" : "Votes"}
-        </Button>
-        <Button
-          className={classes.like}
-          onClick={handleLike}
-          startIcon={
-            user_liked == 1 ? (
-              <FavoriteIcon color="secondary" />
-            ) : (
-              <FavoriteBorderIcon />
-            )
-          }
-        >
-          {num_likes} {num_likes == 1 ? " Like" : "Likes"}
-        </Button>
-        <Button
-          className={classes.comment}
-          onClick={handleComment}
-          startIcon={
-            expanded == true ? (
-              <ChatBubbleIcon color="primary" />
-            ) : (
-              <ChatBubbleOutlineIcon />
-            )
-          }
-        >
-          {comment_count} {comment_count == 1 ? " Comment" : "Comments"}
-        </Button>
-      </CardActions>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <List className={classes.list} dense>
-            {comments.map(
-              ({ user_name, created_at, user_avatar, comment_text }, index) => (
-                <ListItem key={index}>
-                  <ListItemAvatar>
-                    <Avatar src={user_avatar} />
-                  </ListItemAvatar>
-                  <ListItemText
-                    secondary={user_name + " " + getDate(created_at) + " ago"}
-                    primary={comment_text}
-                  />
-                </ListItem>
-              )
-            )}
-          </List>
-          <Divider />
-          <Box className={classes.commentBox}>
-            {isAuthenticated && (
-              <Avatar
-                src={user.picture}
-                alt={user.name}
-                className={classes.avatar}
-              />
-            )}
-            {!isAuthenticated && (
-              <Avatar alt={"Guest"} className={classes.avatar}>
-                <AccountCircle />
-              </Avatar>
-            )}
-            <TextField
-              label="Add a comment..."
-              variant="outlined"
-              value={comment}
-              onChange={(event) => {
-                event.preventDefault();
-                setComment(event.target.value);
-              }}
-              fullWidth
-            />
-            <IconButton color="primary" onClick={handleSubmitComment}>
-              <SendIcon />
-            </IconButton>
-          </Box>
-        </CardContent>
-      </Collapse>
+      <TextField
+        label="Add a comment..."
+        variant="outlined"
+        value={comment}
+        onChange={(event) => {
+          event.preventDefault();
+          setComment(event.target.value);
+        }}
+        fullWidth
+      />
+
+      <IconButton
+        color="primary"
+        onClick={() => {
+          handleSubmitComment(comment);
+        }}
+      >
+        <SendIcon />
+      </IconButton>
     </>
   );
+};
+
+const LikeButton = React.memo(
+  ({ user_liked, num_likes, poll_id, user_id }) => {
+    const classes = useStyles();
+    const { submitLike } = useSQL();
+    const { isAuthenticated } = useAuth0();
+    const { setSignInOpen, setSignInMsg } = useSignIn();
+
+    const handleLike = async () => {
+      if (!isAuthenticated) {
+        setSignInMsg("Sign in to like");
+        setSignInOpen(true);
+        return;
+      }
+
+      const response = await submitLike({ poll_id, user_id });
+      console.log("submit like", response);
+    };
+
+    return (
+      <Button
+        className={classes.like}
+        onClick={handleLike}
+        startIcon={
+          user_liked == 1 ? (
+            <FavoriteIcon color="secondary" />
+          ) : (
+            <FavoriteBorderIcon />
+          )
+        }
+      >
+        {num_likes} {num_likes == 1 ? " Like" : "Likes"}
+      </Button>
+    );
+  },
+  (prev, cur) => {
+    console.log(
+      "likeompare",
+      prev.user_liked == cur.user_liked,
+      prev.num_likes == cur.num_likes,
+      prev.poll_id == cur.poll_id,
+      prev.user_id == cur.user_id
+    );
+    return (
+      prev.user_liked == cur.user_liked &&
+      prev.num_likes == cur.num_likes &&
+      prev.poll_id == cur.poll_id &&
+      prev.user_id == cur.user_id
+    );
+  }
+);
+
+const getDate = (date) => {
+  const a = new Date(date);
+  const b = new Date();
+
+  const utc1 = Date.UTC(
+    a.getFullYear(),
+    a.getMonth(),
+    a.getDate(),
+    a.getHours(),
+    a.getMinutes(),
+    a.getSeconds()
+  );
+  const utc2 = Date.UTC(
+    b.getFullYear(),
+    b.getMonth(),
+    b.getDate(),
+    b.getHours(),
+    b.getMinutes(),
+    b.getSeconds()
+  );
+  const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+  let sec_diff = Math.floor((utc2 - utc1) / 1000);
+  let day_diff = Math.floor((utc2 - utc1) / _MS_PER_DAY);
+
+  //console.log(a, b, utc1, utc2, sec_diff, day_diff, title + poll_id);
+  if (sec_diff < 60) {
+    return Math.round(sec_diff) + "s";
+  } else if (sec_diff < 3600) {
+    return Math.round(sec_diff / 60) + "m";
+  } else if (sec_diff < 86400) {
+    return Math.round(sec_diff / 3600) + "h";
+  } else if (day_diff < 7) {
+    return Math.round(day_diff) + "d";
+  } else if (day_diff < 365) {
+    return Math.round(day_diff / 7) + "w";
+  } else {
+    return Math.round(day_diff / 365) + "y";
+  }
 };

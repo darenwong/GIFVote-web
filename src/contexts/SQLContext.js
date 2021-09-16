@@ -117,24 +117,31 @@ export function SQLProvider({ children }) {
             }
 
             temp[poll_id].options.push({ option_id, option_name, voteCount });
-            temp[poll_id].chartData.labels.push(option_name);
-            temp[poll_id].chartData.datasets[0].data.push(Number(voteCount));
-            if (isVoted_option_id == option_id) {
-              temp[poll_id].chartData.datasets[0].backgroundColor.push(
-                "rgba(34, 191, 160, 1)"
-              );
-            } else {
-              temp[poll_id].chartData.datasets[0].backgroundColor.push(
-                "rgba(10, 10, 10, 0.5)"
-              );
-            }
 
             temp[poll_id].voteData.push({
               option_id: option_id,
               text: option_name,
               votes: Number(voteCount),
+              backgroundColor:
+                isVoted_option_id == option_id
+                  ? "rgba(34, 191, 160, 1)"
+                  : "rgba(10, 10, 10, 0.5)",
             });
           }
+
+          let poll_keys = Object.keys(temp);
+          for (let i = 0; i < poll_keys.length; i++) {
+            let poll_id = poll_keys[i];
+            temp[poll_id].voteData.sort((a, b) => b.votes - a.votes);
+            temp[poll_id].voteData.map(({ text, votes, backgroundColor }) => {
+              temp[poll_id].chartData.labels.push(text);
+              temp[poll_id].chartData.datasets[0].data.push(votes);
+              temp[poll_id].chartData.datasets[0].backgroundColor.push(
+                backgroundColor
+              );
+            });
+          }
+
           let arr = Object.values(temp);
           console.log("sortBy", sortBy);
           switch (sortBy) {
@@ -224,24 +231,30 @@ export function SQLProvider({ children }) {
               };
             }
             temp[poll_id].options.push({ option_id, option_name, voteCount });
-            temp[poll_id].chartData.labels.push(option_name);
-            temp[poll_id].chartData.datasets[0].data.push(Number(voteCount));
-            if (isVoted_option_id == option_id) {
-              temp[poll_id].chartData.datasets[0].backgroundColor.push(
-                "rgba(63, 81, 181, 1)"
-              );
-            } else {
-              temp[poll_id].chartData.datasets[0].backgroundColor.push(
-                "rgba(10, 10, 10, 0.5)"
-              );
-            }
 
             temp[poll_id].voteData.push({
               option_id: option_id,
               text: option_name,
               votes: Number(voteCount),
+              backgroundColor:
+                isVoted_option_id == option_id
+                  ? "rgba(34, 191, 160, 1)"
+                  : "rgba(10, 10, 10, 0.5)",
             });
           }
+          let poll_keys = Object.keys(temp);
+          for (let i = 0; i < poll_keys.length; i++) {
+            let poll_id = poll_keys[i];
+            temp[poll_id].voteData.sort((a, b) => b.votes - a.votes);
+            temp[poll_id].voteData.map(({ text, votes, backgroundColor }) => {
+              temp[poll_id].chartData.labels.push(text);
+              temp[poll_id].chartData.datasets[0].data.push(votes);
+              temp[poll_id].chartData.datasets[0].backgroundColor.push(
+                backgroundColor
+              );
+            });
+          }
+
           let data_copy = JSON.parse(JSON.stringify(data));
           console.log("before", JSON.parse(JSON.stringify(data)));
           for (let i = 0; i < data_copy.length; i++) {

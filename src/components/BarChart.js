@@ -1,12 +1,11 @@
-import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import {Button} from '@material-ui/core';
-
+import React from "react";
+import { Bar } from "react-chartjs-2";
+import { Button } from "@material-ui/core";
 
 const options = {
   maintainAspectRatio: false,
   responsive: false,
-  indexAxis: 'y',
+  indexAxis: "y",
   // Elements options apply to all of the options unless overridden in a dataset
   // In this case, we are setting the border of each horizontal bar to be 2px wide
   scales: {
@@ -23,10 +22,10 @@ const options = {
       grid: {
         display: false,
       },
-      ticks: {    
+      ticks: {
         autoSkip: false,
         stepSize: 2,
-      }
+      },
     },
   },
   elements: {
@@ -38,25 +37,28 @@ const options = {
   plugins: {
     legend: {
       display: false,
-      position: 'right',
+      position: "right",
     },
     title: {
       display: false,
-      text: 'Chart.js Horizontal Bar Chart',
+      text: "Chart.js Horizontal Bar Chart",
     },
   },
 };
 
 const areEqual = (prev, cur) => {
   return JSON.stringify(prev.data) == JSON.stringify(cur.data);
-}
+};
 
-const BarChart = React.memo(({getElementAtEvent, data}) => {
-  
+const BarChart = ({ getElementAtEvent, data }) => {
+  return <Bar data={data} options={options} style={{ width: "100%" }} />;
+};
 
-  return (
-  <Bar data={data} options={options} style={{width:"100%"}}/>
-  )
+export default BarChart;
+/*
+const BarChart = React.memo(({ getElementAtEvent, data }) => {
+  return <Bar data={data} options={options} style={{ width: "100%" }} />;
 }, areEqual);
 
 export default BarChart;
+*/
