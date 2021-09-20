@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   Collapse,
+  Dialog,
   Divider,
   IconButton,
   List,
@@ -34,6 +35,7 @@ import SendIcon from "@material-ui/icons/Send";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useSignIn } from "../contexts/SignInContext";
 import { useSQL } from "../contexts/SQLContext.js";
+import { useWindowSize } from "@react-hook/window-size/throttled";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
@@ -47,9 +49,11 @@ const ENDPOINT = "https://gif-vote.herokuapp.com";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%",
+    width: "50vw",
+    minWidth: "300px",
+    maxWidth: "600px",
     marginBottom: "auto",
-    animation: "$fade 2s linear",
+    marginTop: "auto",
   },
   avatar: {
     margin: theme.spacing(1),
@@ -85,13 +89,35 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "none",
   },
   buttonGroup: {
+    display: "block",
+  },
+  buttonGroupContainer: {
     margin: theme.spacing(1),
-    maxHeight: "30vh",
-    overflow: "scroll",
+    [theme.breakpoints.down("md")]: {
+      height: "100px",
+    },
+    [theme.breakpoints.up("md")]: {
+      height: "200px",
+    },
+    overflowY: "auto",
+    overflowX: "hidden",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   barChart: {
-    maxHeight: "20vh",
-    overflow: "scroll",
+    [theme.breakpoints.down("md")]: {
+      height: "100px",
+    },
+    [theme.breakpoints.up("md")]: {
+      height: "200px",
+    },
+    width: "90%",
+    overflowY: "scroll",
+    overflowX: "hidden",
+    padding: "unset",
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
   },
   subtitle: {
     display: "flex",
@@ -114,7 +140,7 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "none",
   },
   list: {
-    maxHeight: "30vh",
+    maxHeight: "50vh",
     overflow: "scroll",
     backgroundColor: "#f5f5f5",
   },
@@ -133,6 +159,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const areEqual = (prev, cur) => {
+  /*
   console.log(
     "compare",
     prev.title === cur.title,
@@ -163,7 +190,7 @@ const areEqual = (prev, cur) => {
       JSON.stringify(cur.chartData),
       JSON.stringify(prev.chartData) === JSON.stringify(cur.chartData)
     );
-  }
+  }*/
   //console.log("check addCount",prev.addCount, cur.addCount, prev.addCount === cur.addCount)
   return (
     prev.title === cur.title &&
@@ -184,6 +211,8 @@ const areEqual = (prev, cur) => {
 const Poll = React.memo(
   ({
     gifURL,
+    gifHeight,
+    gifWidth,
     addCount,
     title,
     created_by,
@@ -239,7 +268,11 @@ const Poll = React.memo(
             <OptionDropdown />
           </Box>
         </CardContent>
-        <GIFComponent gifURL={gifURL} />
+        <GIFComponent
+          gifURL={gifURL}
+          gifHeight={gifHeight}
+          gifWidth={gifWidth}
+        />
         <VoteComponent
           user_id={user_id}
           poll_id={poll_id}
@@ -264,7 +297,7 @@ const Poll = React.memo(
 export default Poll;
 
 const GIFComponent = React.memo(
-  ({ gifURL }) => {
+  ({ gifURL, gifHeight, gifWidth }) => {
     return (
       <video width="90%" height="auto" loop muted autoPlay playsInline>
         <source src={gifURL} />
@@ -287,18 +320,21 @@ const VoteComponent = React.memo(
             <BarChart data={chartData} />
           </CardContent>
         )}
-        <Box className={classes.buttonGroup}>
-          {isVoted_bool == 0 &&
-            data.map(({ text, option_id }, index) => (
-              <VoteButton
-                key={index}
-                text={text}
-                option_id={option_id}
-                user_id={user_id}
-                poll_id={poll_id}
-              />
-            ))}
-        </Box>
+        {isVoted_bool == 0 && (
+          <Box className={classes.buttonGroupContainer}>
+            <Box className={classes.buttonGroup}>
+              {data.map((item) => (
+                <VoteButton
+                  key={item.option_id}
+                  text={item.text}
+                  option_id={item.option_id}
+                  user_id={user_id}
+                  poll_id={poll_id}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
       </>
     );
   },
@@ -316,7 +352,7 @@ const VoteComponent = React.memo(
 const VoteButton = React.memo(
   ({ text, option_id, user_id, poll_id }) => {
     const classes = useStyles();
-    const { submitVote } = useSQL();
+    const { submitVote, userId } = useSQL();
     const { isAuthenticated } = useAuth0();
     const { setSignInOpen, setSignInMsg } = useSignIn();
 
@@ -327,7 +363,7 @@ const VoteButton = React.memo(
         return;
       }
 
-      const result = await submitVote({ user_id, poll_id, option_id });
+      const result = await submitVote({ user_id: userId, poll_id, option_id });
       console.log("voted", option_id, result);
     };
 
@@ -417,6 +453,7 @@ const LikeComments = React.memo(
     const { getComments, submitComment } = useSQL();
 
     const handleComment = async () => {
+      console.log("comment clicked");
       if (expanded == false) {
         const results = await getComments(poll_id);
         if (results) {
@@ -470,7 +507,7 @@ const LikeComments = React.memo(
             {comment_count} {comment_count == 1 ? " Comment" : "Comments"}
           </Button>
         </CardActions>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <Dialog open={expanded} onClose={() => setExpanded(false)}>
           <CardContent>
             <CommentList comments={comments} />
             <Divider />
@@ -491,7 +528,7 @@ const LikeComments = React.memo(
               <CommentInput handleSubmitComment={handleSubmitComment} />
             </Box>
           </CardContent>
-        </Collapse>
+        </Dialog>
       </>
     );
   },
@@ -564,7 +601,7 @@ const CommentInput = ({ handleSubmitComment }) => {
 const LikeButton = React.memo(
   ({ user_liked, num_likes, poll_id, user_id }) => {
     const classes = useStyles();
-    const { submitLike } = useSQL();
+    const { submitLike, userId } = useSQL();
     const { isAuthenticated } = useAuth0();
     const { setSignInOpen, setSignInMsg } = useSignIn();
 
@@ -575,7 +612,7 @@ const LikeButton = React.memo(
         return;
       }
 
-      const response = await submitLike({ poll_id, user_id });
+      const response = await submitLike({ poll_id, user_id: userId });
       console.log("submit like", response);
     };
 

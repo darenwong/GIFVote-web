@@ -51,7 +51,18 @@ const areEqual = (prev, cur) => {
 };
 
 const BarChart = ({ getElementAtEvent, data }) => {
-  return <Bar data={data} options={options} style={{ width: "100%" }} />;
+  return (
+    <Bar
+      data={data}
+      options={options}
+      style={{
+        width: "80%",
+        marginLeft: "auto",
+        marginRight: "auto",
+        overflow: "hidden",
+      }}
+    />
+  );
 };
 
 export default BarChart;

@@ -4,6 +4,11 @@ import { ThemeProvider } from "@material-ui/styles";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
+import FixedListTest from "./FixedListTest";
+import FlexListTest from "./FlexListTest";
+import FlexListAPI from "./FlexListAPI";
+import AppTest from "./AppTest";
+
 import reportWebVitals from "./reportWebVitals";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { SignInProvider } from "./contexts/SignInContext";

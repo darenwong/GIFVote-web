@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 const SQLContext = React.createContext();
 const ENDPOINT = "https://gif-vote.herokuapp.com";
-
+//const ENDPOINT = "http://localhost:8080";
 export function useSQL() {
   return useContext(SQLContext);
 }
@@ -17,14 +17,14 @@ export function SQLProvider({ children }) {
   const [userId, setUserId] = useState("507");
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
-
+  /*
   useEffect(() => {
     console.log("change", JSON.parse(JSON.stringify(data)));
     if (data.length == 0) {
       getDataset();
     }
   }, [data]);
-
+*/
   useEffect(() => {
     refreshDataset();
   }, [isPersonal, sortBy]);
@@ -72,6 +72,8 @@ export function SQLProvider({ children }) {
               poll_id,
               poll_text,
               gifurl: gifURL,
+              gifheight: gifHeight,
+              gifwidth: gifWidth,
               option_id,
               option_name,
               votecount: voteCount,
@@ -90,6 +92,8 @@ export function SQLProvider({ children }) {
                 poll_text,
                 poll_id,
                 gifURL,
+                gifHeight,
+                gifWidth,
                 totalVoteCount,
                 created_by,
                 user_avatar,
@@ -187,6 +191,8 @@ export function SQLProvider({ children }) {
               poll_id,
               poll_text,
               gifurl: gifURL,
+              gifheight: gifHeight,
+              gifwidth: gifWidth,
               option_id,
               option_name,
               votecount: voteCount,
@@ -205,6 +211,8 @@ export function SQLProvider({ children }) {
                 poll_text,
                 poll_id,
                 gifURL,
+                gifHeight,
+                gifWidth,
                 totalVoteCount,
                 created_by,
                 user_avatar,
@@ -281,6 +289,20 @@ export function SQLProvider({ children }) {
     getDataset();
   };
 
+  const handleFetchMoreDataPromise = () => {
+    return new Promise((resolve, reject) => {
+      console.log("fetching more data ", result, data.length);
+      if (data.length < result.current) {
+        console.log("cancel fetch more data");
+        reject("cancel fetch more data");
+      }
+      result.current += 10;
+      getDataset()
+        .then(() => resolve("OK"))
+        .catch(reject);
+    });
+  };
+
   const submitVote = ({ user_id, poll_id, option_id }) => {
     return new Promise((resolve, reject) => {
       fetch(
@@ -340,7 +362,7 @@ export function SQLProvider({ children }) {
       )
         .then((res) => res.json())
         .then((results) => {
-          console.log("like inserted", results);
+          console.log("like inserted", results, poll_id, user_id);
           updateDataset(poll_id);
           resolve("OK");
         })
@@ -377,6 +399,7 @@ export function SQLProvider({ children }) {
         updateDataset,
         refreshDataset,
         handleFetchMoreData,
+        handleFetchMoreDataPromise,
         isPersonal,
         setIsPersonal,
         hasMore,
