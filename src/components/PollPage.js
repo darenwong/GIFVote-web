@@ -3,7 +3,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
 import Poll from "./Poll.js";
 import PollForm from "./PollForm.js";
-import InfiniteScroll from "react-infinite-scroll-component";
 import FadeInSection from "./FadeInSection";
 import { useSQL } from "../contexts/SQLContext.js";
 import { VariableSizeList as List } from "react-window";

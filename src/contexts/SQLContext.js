@@ -19,7 +19,7 @@ export function SQLProvider({ children }) {
   const [sortBy, setSortBy] = useState("vote");
   /*
   useEffect(() => {
-    console.log("change", JSON.parse(JSON.stringify(data)));
+    //console.log("change", JSON.parse(JSON.stringify(data)));
     if (data.length == 0) {
       getDataset();
     }
@@ -36,13 +36,14 @@ export function SQLProvider({ children }) {
         { method: "POST" }
       )
         .then((res) => {
-          console.log(res);
+          //console.log(res);
           return res.json();
         })
         .then((results) => {
-          console.log("userId = ", results);
+          //console.log("userId = ", results);
           if (results && results[0] && results[0].id) {
             setUserId(String(results[0].id));
+            refreshDataset();
           } else {
             logout();
           }
@@ -54,24 +55,25 @@ export function SQLProvider({ children }) {
 
   const getDataset = () => {
     return new Promise((resolve, reject) => {
-      console.log("getting data", data.length, result.current);
+      //console.log("getting data", data.length, result.current);
       if (data.length > result.current || !hasMore) {
         return;
       }
 
-      console.log("calling API", result.current);
+      //console.log("calling API", result.current);
       fetch(
         `${ENDPOINT}/api-vote/?user_id=${userId}&result=${result.current}&isPersonal=${isPersonal}&sortBy=${sortBy}`
       )
         .then((res) => res.json())
         .then((results) => {
-          console.log("success", results);
+          //console.log("success", results);
           let temp = {};
           for (let i = 0; i < results.length; i++) {
             let {
               poll_id,
               poll_text,
               gifurl: gifURL,
+              gifimage,
               gifheight: gifHeight,
               gifwidth: gifWidth,
               option_id,
@@ -92,6 +94,7 @@ export function SQLProvider({ children }) {
                 poll_text,
                 poll_id,
                 gifURL,
+                gifimage,
                 gifHeight,
                 gifWidth,
                 totalVoteCount,
@@ -147,7 +150,7 @@ export function SQLProvider({ children }) {
           }
 
           let arr = Object.values(temp);
-          console.log("sortBy", sortBy);
+          //console.log("sortBy", sortBy);
           switch (sortBy) {
             case "vote":
               arr.sort((a, b) => b.totalVoteCount - a.totalVoteCount);
@@ -162,7 +165,7 @@ export function SQLProvider({ children }) {
           if (arr.length == 0) {
             setHasMore(false);
           }
-          console.log("new data", arr);
+          //console.log("new data", arr);
           resolve(data);
         })
         .catch(reject);
@@ -177,20 +180,21 @@ export function SQLProvider({ children }) {
 
   const updateDataset = (pollId) => {
     return new Promise((resolve, reject) => {
-      console.log("calling Update API");
-      console.log("before before", JSON.parse(JSON.stringify(data)));
+      //console.log("calling Update API");
+      //console.log("before before", JSON.parse(JSON.stringify(data)));
       fetch(
         `${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}&isPersonal=${isPersonal}`
       )
         .then((res) => res.json())
         .then((results) => {
-          console.log("success", results);
+          //console.log("success", results);
           let temp = {};
           for (let i = 0; i < results.length; i++) {
             let {
               poll_id,
               poll_text,
               gifurl: gifURL,
+              gifimage,
               gifheight: gifHeight,
               gifwidth: gifWidth,
               option_id,
@@ -211,6 +215,7 @@ export function SQLProvider({ children }) {
                 poll_text,
                 poll_id,
                 gifURL,
+                gifimage,
                 gifHeight,
                 gifWidth,
                 totalVoteCount,
@@ -264,14 +269,14 @@ export function SQLProvider({ children }) {
           }
 
           let data_copy = JSON.parse(JSON.stringify(data));
-          console.log("before", JSON.parse(JSON.stringify(data)));
+          //console.log("before", JSON.parse(JSON.stringify(data)));
           for (let i = 0; i < data_copy.length; i++) {
             if (data_copy[i].poll_id == pollId) {
               data_copy[i] = JSON.parse(JSON.stringify(temp[pollId]));
               break;
             }
           }
-          console.log(data_copy);
+          //console.log(data_copy);
           setData(JSON.parse(JSON.stringify(data_copy)));
           resolve(data_copy);
         })
@@ -280,9 +285,9 @@ export function SQLProvider({ children }) {
   };
 
   const handleFetchMoreData = () => {
-    console.log("fetching more data ", result, data.length);
+    //console.log("fetching more data ", result, data.length);
     if (data.length < result.current) {
-      console.log("cancel fetch more data");
+      //console.log("cancel fetch more data");
       return;
     }
     result.current += 10;
@@ -291,9 +296,9 @@ export function SQLProvider({ children }) {
 
   const handleFetchMoreDataPromise = () => {
     return new Promise((resolve, reject) => {
-      console.log("fetching more data ", result, data.length);
+      //console.log("fetching more data ", result, data.length);
       if (data.length < result.current) {
-        console.log("cancel fetch more data");
+        //console.log("cancel fetch more data");
         reject("cancel fetch more data");
       }
       result.current += 10;
@@ -310,11 +315,11 @@ export function SQLProvider({ children }) {
         { method: "POST" }
       )
         .then((res) => {
-          console.log(res);
+          //console.log(res);
           res.json();
         })
         .then((results) => {
-          console.log("update", results);
+          //console.log("update", results);
           updateDataset(poll_id);
           resolve("OK");
         })
@@ -327,7 +332,7 @@ export function SQLProvider({ children }) {
       fetch(`${ENDPOINT}/api-comments/?poll_id=${poll_id}`)
         .then((res) => res.json())
         .then((results) => {
-          console.log("comments", results);
+          //console.log("comments", results);
           resolve(results);
         })
         .catch(reject);
@@ -344,7 +349,7 @@ export function SQLProvider({ children }) {
       )
         .then((res) => res.json())
         .then(async (results) => {
-          console.log("comment inserted", results);
+          //console.log("comment inserted", results);
           updateDataset(poll_id);
           resolve("OK");
         })
@@ -362,7 +367,7 @@ export function SQLProvider({ children }) {
       )
         .then((res) => res.json())
         .then((results) => {
-          console.log("like inserted", results, poll_id, user_id);
+          //console.log("like inserted", results, poll_id, user_id);
           updateDataset(poll_id);
           resolve("OK");
         })
@@ -379,11 +384,11 @@ export function SQLProvider({ children }) {
         }
       )
         .then((res) => {
-          console.log("hello1", res);
+          //console.log("hello1", res);
           return res.json();
         })
         .then((results) => {
-          console.log("hello2", results);
+          //console.log("hello2", results);
           resolve("OK");
         })
         .catch(reject);

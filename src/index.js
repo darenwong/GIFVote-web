@@ -7,7 +7,6 @@ import App from "./App";
 import FixedListTest from "./FixedListTest";
 import FlexListTest from "./FlexListTest";
 import FlexListAPI from "./FlexListAPI";
-import AppTest from "./AppTest";
 
 import reportWebVitals from "./reportWebVitals";
 import { Auth0Provider } from "@auth0/auth0-react";
@@ -28,7 +27,7 @@ defaults.font.family = [
   '"Segoe UI Symbol"',
 ].join(",");
 defaults.font.size = 10;
-console.log("default", defaults);
+//console.log("default", defaults);
 
 const domain = process.env.REACT_APP_AUTH0_DOMAIN;
 const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;

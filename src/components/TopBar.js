@@ -1,33 +1,41 @@
-import React, {useState} from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import {AppBar, Button, Drawer, List, ListItem, ListItemAvatar, ListItemText, ListItemIcon, Divider} from '@material-ui/core';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import Avatar from '@material-ui/core/Avatar';
-import MenuIcon from '@material-ui/icons/Menu';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormGroup from '@material-ui/core/FormGroup';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import { Breadcrumbs } from '@material-ui/core';
-import DropdownMenu from './DropdownMenu.js';
-import { useAuth0 } from '@auth0/auth0-react';
-import { BiLogIn, BiLogOut } from "react-icons/bi";
-import SettingsIcon from '@material-ui/icons/Settings';
-import InfoIcon from '@material-ui/icons/Info';
-import FeedbackIcon from '@material-ui/icons/Feedback';
-import WhatshotIcon from '@material-ui/icons/Whatshot';
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import ScheduleIcon from '@material-ui/icons/Schedule';
-import FaceIcon from '@material-ui/icons/Face';
-import GIFVoteLogo from '../images/gif_vote_logo3.png';
-
+import React, { useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
 import {
-  NavLink
-} from "react-router-dom";
+  AppBar,
+  Button,
+  Drawer,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+} from "@material-ui/core";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import IconButton from "@material-ui/core/IconButton";
+import Avatar from "@material-ui/core/Avatar";
+import MenuIcon from "@material-ui/icons/Menu";
+import AccountCircle from "@material-ui/icons/AccountCircle";
+import Switch from "@material-ui/core/Switch";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@material-ui/core/Menu";
+import { Breadcrumbs } from "@material-ui/core";
+import DropdownMenu from "./DropdownMenu.js";
+import { useAuth0 } from "@auth0/auth0-react";
+import { BiLogIn, BiLogOut } from "react-icons/bi";
+import SettingsIcon from "@material-ui/icons/Settings";
+import InfoIcon from "@material-ui/icons/Info";
+import FeedbackIcon from "@material-ui/icons/Feedback";
+import WhatshotIcon from "@material-ui/icons/Whatshot";
+import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
+import ScheduleIcon from "@material-ui/icons/Schedule";
+import FaceIcon from "@material-ui/icons/Face";
+import GIFVoteLogo from "../images/gif_vote_logo3.png";
+
+import { NavLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,34 +46,34 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
-    color: "black"
+    color: "black",
   },
   toolbar: {
     backgroundColor: "#fafafa",
   },
   passiveLink: {
-    display: 'flex',
+    display: "flex",
     alignItems: "center",
     color: "rgba(0, 0, 0, 0.54)",
-    textDecoration: 'none',
-    '&:hover':{
+    textDecoration: "none",
+    "&:hover": {
       textDecoration: "underline",
     },
   },
   activeLink: {
-    display: 'flex',
+    display: "flex",
     color: "rgba(34, 191, 160, 1)",
-    textDecoration: "underline"
+    textDecoration: "underline",
   },
   loginButton: {
-    marginLeft: theme.spacing(2)
+    marginLeft: theme.spacing(2),
   },
   breadcrumbs: {
-    marginLeft: "auto"
+    marginLeft: "auto",
   },
   logo: {
-    height:"35px",
-    width:"auto",
+    height: "35px",
+    width: "auto",
     maxWidth: "50vw",
     margin: theme.spacing(1),
   },
@@ -76,12 +84,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function MenuAppBar({isOpen, setIsOpen}) {
+export default function MenuAppBar({ isOpen, setIsOpen }) {
   const classes = useStyles();
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const {loginWithRedirect, logout, isAuthenticated, user} = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
@@ -98,106 +106,146 @@ export default function MenuAppBar({isOpen, setIsOpen}) {
   const handleLogIn = () => {
     loginWithRedirect();
     handleClose();
-  }
+  };
   const handleLogOut = () => {
     logout();
     handleClose();
-  }
+  };
 
   return (
     <div className={classes.root}>
       <AppBar position="fixed">
         <Toolbar className={classes.toolbar}>
-          <MenuDrawer/>
+          <MenuDrawer />
           <img className={classes.logo} alt="GIF Vote" src={GIFVoteLogo} />
-          <SimpleBreadcrumbs />
+          {false && <SimpleBreadcrumbs />}
         </Toolbar>
       </AppBar>
     </div>
   );
 }
 
-
 const SimpleBreadcrumbs = () => {
   const classes = useStyles();
-  const {isAuthenticated} = useAuth0();
+  const { isAuthenticated } = useAuth0();
 
   return (
     <Breadcrumbs aria-label="breadcrumb" className={classes.breadcrumbs}>
-      <NavLink className={classes.passiveLink} activeClassName={classes.activeLink} exact to="/">
+      <NavLink
+        className={classes.passiveLink}
+        activeClassName={classes.activeLink}
+        exact
+        to="/"
+      >
         <WhatshotIcon className={classes.icon} />
         Most Votes
       </NavLink>
-      <NavLink className={classes.passiveLink} activeClassName={classes.activeLink} to="/most-like">
+      <NavLink
+        className={classes.passiveLink}
+        activeClassName={classes.activeLink}
+        to="/most-like"
+      >
         <FavoriteBorderIcon className={classes.icon} />
         Most Likes
       </NavLink>
-      <NavLink className={classes.passiveLink} activeClassName={classes.activeLink} to="/latest">
+      <NavLink
+        className={classes.passiveLink}
+        activeClassName={classes.activeLink}
+        to="/latest"
+      >
         <ScheduleIcon className={classes.icon} />
         Latest
       </NavLink>
-      {isAuthenticated &&
-        <NavLink className={classes.passiveLink} activeClassName={classes.activeLink} to="/your">
+      {isAuthenticated && (
+        <NavLink
+          className={classes.passiveLink}
+          activeClassName={classes.activeLink}
+          to="/your"
+        >
           <FaceIcon className={classes.icon} />
           Your Polls
         </NavLink>
-      }
+      )}
     </Breadcrumbs>
   );
-}
+};
 
 const MenuDrawer = () => {
   const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
-  const {isAuthenticated, user, loginWithRedirect, logout} = useAuth0();
+  const { isAuthenticated, user, loginWithRedirect, logout } = useAuth0();
 
   return (
     <>
-      <IconButton edge="start" className={classes.menuButton} color="textPrimary" aria-label="menu" onClick={()=>setIsOpen(!isOpen)}>
+      <IconButton
+        edge="start"
+        className={classes.menuButton}
+        aria-label="menu"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <MenuIcon />
       </IconButton>
-      <Drawer anchor="left" open={isOpen} onClose={()=>{setIsOpen(false)}}>
+      <Drawer
+        anchor="left"
+        open={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+      >
         <List>
           <ListItem>
             <ListItemAvatar>
-              {isAuthenticated && 
-                <Avatar src={user.picture} alt={user.name}/>
-              }
-              {!isAuthenticated &&
+              {isAuthenticated && <Avatar src={user.picture} alt={user.name} />}
+              {!isAuthenticated && (
                 <Avatar alt={"Guest"}>
                   <AccountCircle />
                 </Avatar>
-              }
+              )}
             </ListItemAvatar>
-            <ListItemText primary={ (user)?user.name:"Guest"} secondary={(user) ? user.email : "Sign in to see your profile"}/>
+            <ListItemText
+              primary={user ? user.name : "Guest"}
+              secondary={user ? user.email : "Sign in to see your profile"}
+            />
 
-              {isAuthenticated && 
-                <IconButton className={classes.loginButton} onClick={logout}>
-                  <BiLogOut/>
-                </IconButton>
-              }
-              {!isAuthenticated &&
-                <IconButton className={classes.loginButton} onClick={loginWithRedirect}>
-                  <BiLogIn/>
-                </IconButton>
-              }
+            {isAuthenticated && (
+              <IconButton className={classes.loginButton} onClick={logout}>
+                <BiLogOut />
+              </IconButton>
+            )}
+            {!isAuthenticated && (
+              <IconButton
+                className={classes.loginButton}
+                onClick={loginWithRedirect}
+              >
+                <BiLogIn />
+              </IconButton>
+            )}
           </ListItem>
-          <Divider/>
+          <Divider />
           <ListItem button>
-            <ListItemIcon><FeedbackIcon/></ListItemIcon>
-            <ListItemText primary={"Give Feedback"} secondary={"Help us improve GIF Votes"} />
+            <ListItemIcon>
+              <FeedbackIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary={"Give Feedback"}
+              secondary={"Help us improve GIF Votes"}
+            />
           </ListItem>
-          <Divider/>
+          <Divider />
           <ListItem button>
-            <ListItemIcon><SettingsIcon/></ListItemIcon>
+            <ListItemIcon>
+              <SettingsIcon />
+            </ListItemIcon>
             <ListItemText primary={"Settings"} />
           </ListItem>
           <ListItem button>
-            <ListItemIcon><InfoIcon/></ListItemIcon>
+            <ListItemIcon>
+              <InfoIcon />
+            </ListItemIcon>
             <ListItemText primary={"About"} />
           </ListItem>
         </List>
       </Drawer>
     </>
   );
-}
+};

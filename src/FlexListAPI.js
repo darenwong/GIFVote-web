@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import { Typography } from "@material-ui/core";
 import { VariableSizeList } from "react-window";
 import Poll from "./components/Poll";
 import { useSQL } from "./contexts/SQLContext.js";
@@ -6,13 +8,22 @@ import InfiniteLoader from "react-window-infinite-loader";
 //import useWindowDimensions from "./hooks/useWindowDimensions";
 import { useWindowSize } from "@react-hook/window-size/throttled";
 
+const useStyles = makeStyles((theme) => ({
+  root: {},
+  loading: {
+    marginTop: "30vh",
+  },
+}));
+
 const Row = ({ index, style, data }) => {
+  const classes = useStyles();
   if (index == data.length) {
-    return <div style={{ height: "50px" }}>Loading...</div>;
+    return <Typography className={classes.loading}>Loading...</Typography>;
   }
 
   const {
     gifURL,
+    gifimage,
     gifHeight,
     gifWidth,
     userId: user_id,
@@ -39,6 +50,7 @@ const Row = ({ index, style, data }) => {
     <div style={{ ...style, ...customStyle }}>
       <Poll
         gifURL={gifURL}
+        gifimage={gifimage}
         gifHeight={gifHeight}
         gifWidth={gifWidth}
         key={index}
@@ -83,7 +95,7 @@ const FlexListAPI = () => {
   const getItemSize = (index) => {
     // return a size for items[index]
     if (index >= data.length) {
-      console.log(index);
+      //console.log(index);
       return 120;
     }
 
@@ -95,7 +107,7 @@ const FlexListAPI = () => {
       renderedVideoHeight += 100;
     }
 
-    console.log(index, renderedVideoHeight, videoContainerWidth, width);
+    //console.log(index, renderedVideoHeight, videoContainerWidth, width);
 
     return renderedVideoHeight + 350;
   };
@@ -104,23 +116,25 @@ const FlexListAPI = () => {
 
   /*
   const loadMoreItems = (startIndex, stopIndex) => {
-    console.log("load more", startIndex, stopIndex);
+    //console.log("load more", startIndex, stopIndex);
     setMoreItemsLoading(true);
     getDataset()
       .then(() => {
         setMoreItemsLoading(false);
       })
-      .catch(console.log);
+      .catch(//console.log);
     // method to fetch newer entries for the list
   };*/
 
   const loadMoreItems = (startIndex, stopIndex) => {
-    console.log("loading more data", startIndex, stopIndex);
+    //console.log("loading more data", startIndex, stopIndex);
     return new Promise((resolve) => {
-      handleFetchMoreDataPromise().then(() => {
-        console.log("loaded more data");
-        resolve("OK");
-      });
+      handleFetchMoreDataPromise()
+        .then(() => {
+          //console.log("loaded more data");
+          resolve("OK");
+        })
+        .catch(() => {});
       // method to fetch newer entries for the list
     });
   };

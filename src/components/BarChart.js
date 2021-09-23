@@ -50,7 +50,7 @@ const areEqual = (prev, cur) => {
   return JSON.stringify(prev.data) == JSON.stringify(cur.data);
 };
 
-const BarChart = ({ getElementAtEvent, data }) => {
+const BarChart = React.memo(({ getElementAtEvent, data }) => {
   return (
     <Bar
       data={data}
@@ -63,7 +63,7 @@ const BarChart = ({ getElementAtEvent, data }) => {
       }}
     />
   );
-};
+}, areEqual);
 
 export default BarChart;
 /*
