@@ -9,6 +9,8 @@ import { VariableSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import FlexListAPI from "../FlexListAPI.js";
 
+import InfiniteScroll from "react-infinite-scroll-component";
+
 const useStyles = makeStyles((theme) => ({
   root: {},
   paper: {
@@ -66,9 +68,78 @@ function PollPage({ personal, sortBy }) {
 
   return (
     <div className={classes.root}>
-      <div className={classes.infiniteList}>
-        <FlexListAPI />
-      </div>
+      <InfiniteScroll
+        dataLength={data.length}
+        next={handleFetchMoreData}
+        hasMore={hasMore}
+        loader={<h4>Loading...</h4>}
+        endMessage={
+          <p style={{ textAlign: "center" }}>
+            <b>Yay! You have seen it all</b>
+          </p>
+        }
+      >
+        <Grid container spacing={0} className={classes.gridContainer}>
+          {data.map(
+            (
+              {
+                gifURL,
+                gifimage,
+                gifHeight,
+                gifWidth,
+                userId: user_id,
+                poll_text,
+                created_by,
+                user_avatar,
+                created_at,
+                winner,
+                chartData,
+                voteData,
+                poll_id,
+                isVoted_bool,
+                totalVoteCount,
+                comment_count,
+                num_likes,
+                user_liked,
+              },
+              index
+            ) => {
+              return (
+                <Grid
+                  key={index}
+                  item
+                  xs={12}
+                  sm={12}
+                  lg={12}
+                  className={classes.itemContainer}
+                >
+                  <Poll
+                    gifURL={gifURL}
+                    gifimage={gifimage}
+                    gifHeight={gifHeight}
+                    gifWidth={gifWidth}
+                    key={index}
+                    user_id={user_id}
+                    title={poll_text}
+                    created_by={created_by}
+                    user_avatar={user_avatar}
+                    created_at={created_at}
+                    winner={winner}
+                    chartData={chartData}
+                    data={voteData}
+                    poll_id={poll_id}
+                    isVoted_bool={isVoted_bool}
+                    totalVoteCount={totalVoteCount}
+                    comment_count={comment_count}
+                    num_likes={num_likes}
+                    user_liked={user_liked}
+                  />
+                </Grid>
+              );
+            }
+          )}
+        </Grid>
+      </InfiniteScroll>
       <div className={classes.newPollDialog}>
         <PollForm />
       </div>

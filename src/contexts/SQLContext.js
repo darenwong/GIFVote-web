@@ -17,14 +17,14 @@ export function SQLProvider({ children }) {
   const [userId, setUserId] = useState("507");
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
-  /*
+
   useEffect(() => {
     //console.log("change", JSON.parse(JSON.stringify(data)));
     if (data.length == 0) {
       getDataset();
     }
   }, [data]);
-*/
+
   useEffect(() => {
     refreshDataset();
   }, [isPersonal, sortBy]);
@@ -55,7 +55,7 @@ export function SQLProvider({ children }) {
 
   const getDataset = () => {
     return new Promise((resolve, reject) => {
-      //console.log("getting data", data.length, result.current);
+      console.log("getting data", data.length, result.current);
       if (data.length > result.current || !hasMore) {
         return;
       }
@@ -285,7 +285,7 @@ export function SQLProvider({ children }) {
   };
 
   const handleFetchMoreData = () => {
-    //console.log("fetching more data ", result, data.length);
+    console.log("fetching more data ", result, data.length);
     if (data.length < result.current) {
       //console.log("cancel fetch more data");
       return;
