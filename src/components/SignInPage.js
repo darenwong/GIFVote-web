@@ -14,7 +14,6 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSignIn } from "../contexts/SignInContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -41,14 +40,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function SignInPage(props) {
+function SignInPage({ signInMsg, open, handleClose }) {
   const classes = useStyles();
-  const { signInOpen, setSignInOpen, signInMsg, setSignInMsg } = useSignIn();
   const { loginWithRedirect, loginWithPopup, isAuthenticated } = useAuth0();
+  //const [signInOpen, setSignInOpen] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && signInOpen) {
-      setSignInOpen(false);
+    if (isAuthenticated && open) {
+      handleClose();
     }
   }, [isAuthenticated]);
 
@@ -69,13 +68,7 @@ function SignInPage(props) {
 
   return (
     <div>
-      <Dialog
-        open={signInOpen}
-        onClose={() => {
-          setSignInOpen(false);
-        }}
-        className={classes.root}
-      >
+      <Dialog open={open} onClose={handleClose} className={classes.root}>
         <DialogTitle disableTypography className={classes.title}>
           <Typography variant="h4" className={classes.titleText}>
             {signInMsg}
@@ -83,9 +76,7 @@ function SignInPage(props) {
           <IconButton
             aria-label="close"
             className={classes.closeButton}
-            onClick={() => {
-              setSignInOpen(false);
-            }}
+            onClick={handleClose}
           >
             <CloseIcon />
           </IconButton>

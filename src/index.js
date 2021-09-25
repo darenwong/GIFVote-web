@@ -26,7 +26,7 @@ defaults.font.family = [
   '"Segoe UI Emoji"',
   '"Segoe UI Symbol"',
 ].join(",");
-defaults.font.size = 10;
+defaults.font.size = 8;
 //console.log("default", defaults);
 
 const domain = process.env.REACT_APP_AUTH0_DOMAIN;

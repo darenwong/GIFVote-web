@@ -19,6 +19,7 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
+  Tooltip,
 } from "@material-ui/core";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
@@ -44,6 +45,7 @@ import ShareIcon from "@material-ui/icons/Share";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import { Waypoint } from "react-waypoint";
+import SignInPage from "./SignInPage.js";
 
 const ENDPOINT = "https://gif-vote.herokuapp.com";
 
@@ -57,6 +59,7 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     margin: theme.spacing(1),
+    marginRight: theme.spacing(2),
   },
   bullet: {
     display: "inline-block",
@@ -87,22 +90,18 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
     textTransform: "none",
+    whiteSpace: "nowrap",
   },
   buttonGroup: {
-    display: "block",
+    display: "flex",
+    flexDirection: "flex-start",
   },
   buttonGroupContainer: {
     margin: theme.spacing(1),
-    [theme.breakpoints.down("md")]: {
-      height: "100px",
-    },
-    [theme.breakpoints.up("md")]: {
-      height: "200px",
-    },
-    overflowY: "auto",
-    overflowX: "hidden",
+    height: "100px",
+    overflowY: "hidden",
+    overflowX: "scroll",
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
   },
   barChart: {
@@ -110,14 +109,17 @@ const useStyles = makeStyles((theme) => ({
       height: "100px",
     },
     [theme.breakpoints.up("md")]: {
-      height: "200px",
+      height: "100px",
     },
     width: "90%",
     overflowY: "scroll",
     overflowX: "hidden",
-    padding: "unset",
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+    paddingTop: "0px",
+    paddingBottom: "0px !important",
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
   },
   subtitle: {
     display: "flex",
@@ -151,6 +153,22 @@ const useStyles = makeStyles((theme) => ({
   titleBox: {
     display: "flex",
     alignItems: "flex-start",
+  },
+  titleText: {
+    textAlign: "start",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    "& .MuiListItemText-primary": {
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    },
+    "& .MuiListItemText-secondary": {
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    },
   },
   vote: {
     marginRight: "auto",
@@ -208,33 +226,31 @@ const areEqual = (prev, cur) => {
   );
 };
 
-const Poll = ({
-  gifURL,
-  gifimage,
-  gifHeight,
-  gifWidth,
-  addCount,
-  title,
-  created_by,
-  user_avatar,
-  created_at,
-  user_id,
-  winner,
-  data,
-  poll_id,
-  isVoted_bool,
-  isVoted_option_id,
-  chartData,
-  totalVoteCount,
-  comment_count,
-  num_likes,
-  user_liked,
-}) => {
-  const classes = useStyles();
-  const videoRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
+const Poll = React.memo(
+  ({
+    gifURL,
+    gifimage,
+    gifHeight,
+    gifWidth,
+    title,
+    created_by,
+    user_avatar,
+    created_at,
+    user_id,
+    data,
+    poll_id,
+    isVoted_bool,
+    chartData,
+    totalVoteCount,
+    comment_count,
+    num_likes,
+    user_liked,
+  }) => {
+    const classes = useStyles();
+    const videoRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(false);
 
-  /*
+    /*
   useEffect(() => {
     if (isVisible) {
       videoRef.current.play();
@@ -246,11 +262,10 @@ const Poll = ({
   }, [isVisible]);
 */
 
-  return (
-    <Card className={classes.root} variant="outlined">
-      <CardContent>
-        <Box className={classes.titleBox}>
-          <ListItem>
+    return (
+      <Card className={classes.root} variant="outlined">
+        <CardContent>
+          <Box className={classes.titleBox}>
             <ListItemAvatar>
               <Avatar
                 alt={"Guest"}
@@ -260,44 +275,74 @@ const Poll = ({
                 <AccountCircle />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText
-              primary={title}
-              secondary={created_by + " " + getDate(created_at) + " ago"}
-            />
-          </ListItem>
-          <OptionDropdown />
-        </Box>
-      </CardContent>
-      <GIFComponent
-        gifURL={gifURL}
-        gifimage={gifimage}
-        gifHeight={gifHeight}
-        gifWidth={gifWidth}
-      />
-      <VoteComponent
-        user_id={user_id}
-        poll_id={poll_id}
-        data={data}
-        isVoted_bool={isVoted_bool}
-        chartData={chartData}
-      />
-      <Divider />
-      <LikeComments
-        poll_id={poll_id}
-        user_id={user_id}
-        totalVoteCount={totalVoteCount}
-        user_liked={user_liked}
-        num_likes={num_likes}
-        comment_count={comment_count}
-      />
-    </Card>
-  );
-};
+            <Tooltip title={title}>
+              <ListItemText
+                className={classes.titleText}
+                primary={title}
+                secondary={created_by + " " + getDate(created_at) + " ago"}
+              />
+            </Tooltip>
+            <OptionDropdown />
+          </Box>
+        </CardContent>
+        <GIFComponent
+          gifURL={gifURL}
+          gifimage={gifimage}
+          gifHeight={gifHeight}
+          gifWidth={gifWidth}
+        />
+        <VoteComponent
+          user_id={user_id}
+          poll_id={poll_id}
+          data={data}
+          isVoted_bool={isVoted_bool}
+          chartData={chartData}
+        />
+        <Divider />
+        <LikeComments
+          poll_id={poll_id}
+          user_id={user_id}
+          totalVoteCount={totalVoteCount}
+          user_liked={user_liked}
+          num_likes={num_likes}
+          comment_count={comment_count}
+        />
+      </Card>
+    );
+  },
+  (prev, cur) => {
+    return (
+      prev.gifURL == cur.gifURL &&
+      prev.gifimage == cur.gifimage &&
+      prev.gifHeight == cur.gifHeight &&
+      prev.gifWidth == cur.gifWidth &&
+      prev.title == cur.title &&
+      prev.created_by == cur.created_by &&
+      prev.user_avatar == cur.user_avatar &&
+      prev.created_at == cur.created_at &&
+      prev.user_id == cur.user_id &&
+      JSON.toString(prev.data) == JSON.toString(cur.data) &&
+      prev.poll_id == cur.poll_id &&
+      prev.isVoted_bool == cur.isVoted_bool &&
+      JSON.toString(prev.chartData) == JSON.toString(cur.chartData) &&
+      prev.totalVoteCount == cur.totalVoteCount &&
+      prev.comment_count == cur.comment_count &&
+      prev.num_likes == cur.num_likes &&
+      prev.user_liked == cur.user_liked
+    );
+  }
+);
 export default Poll;
 
-const GIFComponent = ({ gifURL, gifimage, gifHeight, gifWidth }) => {
+const GIFComponent = ({
+  gifURL,
+  gifimage,
+  gifHeight,
+  gifWidth,
+  isScrolling,
+}) => {
   const [width, height] = useWindowSize();
-  let videoContainerWidth = Math.min(600, Math.max(300, width * 0.5)) * 0.9;
+  let videoContainerWidth = Math.min(600, Math.max(300, width * 0.5));
   let renderedVideoHeight = (gifHeight * videoContainerWidth) / gifWidth;
   let [shouldPlay, updatePlayState] = useState(false);
   const videoRef = useRef();
@@ -358,7 +403,7 @@ const VoteComponent = ({ data, isVoted_bool, chartData, user_id, poll_id }) => {
   const classes = useStyles();
 
   return (
-    <>
+    <div>
       {isVoted_bool == 1 && (
         <CardContent className={classes.barChart}>
           <BarChart data={chartData} />
@@ -379,7 +424,7 @@ const VoteComponent = ({ data, isVoted_bool, chartData, user_id, poll_id }) => {
           </Box>
         </Box>
       )}
-    </>
+    </div>
   );
 };
 
@@ -387,12 +432,14 @@ const VoteButton = ({ text, option_id, user_id, poll_id }) => {
   const classes = useStyles();
   const { submitVote, userId } = useSQL();
   const { isAuthenticated } = useAuth0();
-  const { setSignInOpen, setSignInMsg } = useSignIn();
+  //const { setSignInOpen, setSignInMsg } = useSignIn();
+  const [open, setOpen] = useState(false);
 
   const handleVote = async (event, option_id) => {
     if (!isAuthenticated) {
-      setSignInMsg("Sign in to vote");
-      setSignInOpen(true);
+      //setSignInMsg("Sign in to vote");
+      //setSignInOpen(true);
+      setOpen(true);
       return;
     }
 
@@ -401,14 +448,21 @@ const VoteButton = ({ text, option_id, user_id, poll_id }) => {
   };
 
   return (
-    <Button
-      variant="outlined"
-      color="primary"
-      className={classes.button}
-      onClick={(event) => handleVote(event, option_id)}
-    >
-      {text}
-    </Button>
+    <div>
+      <SignInPage
+        signInMsg={"Sign in to vote"}
+        open={open}
+        handleClose={() => setOpen(false)}
+      />
+      <Button
+        variant="outlined"
+        color="primary"
+        className={classes.button}
+        onClick={(event) => handleVote(event, option_id)}
+      >
+        {text}
+      </Button>
+    </div>
   );
 };
 
@@ -472,8 +526,9 @@ const LikeComments = ({
   const [expanded, setExpanded] = useState(false);
   const [comments, setComments] = useState([]);
   const { isAuthenticated, user } = useAuth0();
-  const { setSignInOpen, setSignInMsg } = useSignIn();
+  //const { setSignInOpen, setSignInMsg } = useSignIn();
   const { getComments, submitComment, userId } = useSQL();
+  const [open, setOpen] = useState(false);
 
   const handleComment = async () => {
     //console.log("comment clicked");
@@ -489,8 +544,8 @@ const LikeComments = ({
 
   const handleSubmitComment = async (comment) => {
     if (!isAuthenticated) {
-      setSignInMsg("Sign in to comment");
-      setSignInOpen(true);
+      //setSignInMsg("Sign in to comment");
+      setOpen(true);
       return;
     }
 
@@ -505,7 +560,12 @@ const LikeComments = ({
   };
 
   return (
-    <>
+    <div>
+      <SignInPage
+        signInMsg={"Sign in to comment"}
+        open={open}
+        handleClose={() => setOpen(false)}
+      />
       <CardActions disableSpacing>
         <Button className={classes.vote} startIcon={<WhatshotIcon />}>
           {totalVoteCount} {totalVoteCount == 1 ? " Vote" : "Votes"}
@@ -552,7 +612,7 @@ const LikeComments = ({
           </Box>
         </CardContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
@@ -609,33 +669,47 @@ const LikeButton = ({ user_liked, num_likes, poll_id, user_id }) => {
   const classes = useStyles();
   const { submitLike, userId } = useSQL();
   const { isAuthenticated } = useAuth0();
-  const { setSignInOpen, setSignInMsg } = useSignIn();
+  //const { setSignInOpen, setSignInMsg } = useSignIn();
+  const [open, setOpen] = useState(false);
+
+  const submitLikeMemoized = React.useCallback(() => {
+    submitLike({ poll_id, user_id: userId });
+  }, [poll_id, userId]);
 
   const handleLike = async () => {
     if (!isAuthenticated) {
-      setSignInMsg("Sign in to like");
-      setSignInOpen(true);
+      //setSignInMsg("Sign in to like");
+      setOpen(true);
+      console.log("like", isAuthenticated, open);
       return;
     }
 
     const response = await submitLike({ poll_id, user_id: userId });
+    //const response = await submitLikeMemoized();
     //console.log("submit like", response);
   };
 
   return (
-    <Button
-      className={classes.like}
-      onClick={handleLike}
-      startIcon={
-        user_liked == 1 ? (
-          <FavoriteIcon color="secondary" />
-        ) : (
-          <FavoriteBorderIcon />
-        )
-      }
-    >
-      {num_likes} {num_likes == 1 ? " Like" : "Likes"}
-    </Button>
+    <div>
+      <SignInPage
+        signInMsg={"Sign in to like"}
+        open={open}
+        handleClose={() => setOpen(false)}
+      />
+      <Button
+        className={classes.like}
+        onClick={handleLike}
+        startIcon={
+          user_liked == 1 ? (
+            <FavoriteIcon color="secondary" />
+          ) : (
+            <FavoriteBorderIcon />
+          )
+        }
+      >
+        {num_likes} {num_likes == 1 ? " Like" : "Likes"}
+      </Button>
+    </div>
   );
 };
 

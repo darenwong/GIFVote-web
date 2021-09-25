@@ -1,4 +1,10 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 const SQLContext = React.createContext();
 const ENDPOINT = "https://gif-vote.herokuapp.com";
@@ -11,12 +17,15 @@ export function SQLProvider({ children }) {
   const [signInOpen, setSignInOpen] = useState(false);
   const [signInMsg, setSignInMsg] = useState("");
   const [data, setData] = useState([]);
-  const result = useRef(10);
+  const result = useRef(0);
   const [hasMore, setHasMore] = useState(true);
   const [isPersonal, setIsPersonal] = useState(0);
   const [userId, setUserId] = useState("507");
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const seen = useRef(new Set());
+
   /*
   useEffect(() => {
     //console.log("change", JSON.parse(JSON.stringify(data)));
@@ -26,8 +35,13 @@ export function SQLProvider({ children }) {
   }, [data]);
 */
   useEffect(() => {
+    console.log("isPersonal, sortBy setting changed");
     refreshDataset();
   }, [isPersonal, sortBy]);
+
+  useEffect(() => {
+    console.log("data changed", data);
+  }, [data]);
 
   const getUserData = (user) => {
     return new Promise((resolve, reject) => {
@@ -40,7 +54,7 @@ export function SQLProvider({ children }) {
           return res.json();
         })
         .then((results) => {
-          //console.log("userId = ", results);
+          console.log("userId = ", results);
           if (results && results[0] && results[0].id) {
             setUserId(String(results[0].id));
             refreshDataset();
@@ -55,14 +69,15 @@ export function SQLProvider({ children }) {
 
   const getDataset = () => {
     return new Promise((resolve, reject) => {
-      //console.log("getting data", data.length, result.current);
+      console.log("getting data", data.length, seen);
+      /*
       if (data.length > result.current || !hasMore) {
         return;
-      }
+      }*/
 
       //console.log("calling API", result.current);
       fetch(
-        `${ENDPOINT}/api-vote/?user_id=${userId}&result=${result.current}&isPersonal=${isPersonal}&sortBy=${sortBy}`
+        `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal}&sortBy=${sortBy}`
       )
         .then((res) => res.json())
         .then((results) => {
@@ -89,6 +104,10 @@ export function SQLProvider({ children }) {
               num_likes,
               user_liked,
             } = results[i];
+            if (seen.current.has(poll_id)) {
+              continue;
+            }
+
             if (!(poll_id in temp)) {
               temp[poll_id] = {
                 poll_text,
@@ -139,6 +158,7 @@ export function SQLProvider({ children }) {
           let poll_keys = Object.keys(temp);
           for (let i = 0; i < poll_keys.length; i++) {
             let poll_id = poll_keys[i];
+            seen.current.add(poll_id);
             temp[poll_id].voteData.sort((a, b) => b.votes - a.votes);
             temp[poll_id].voteData.map(({ text, votes, backgroundColor }) => {
               temp[poll_id].chartData.labels.push(text);
@@ -165,17 +185,22 @@ export function SQLProvider({ children }) {
           if (arr.length == 0) {
             setHasMore(false);
           }
-          //console.log("new data", arr);
+          console.log("new data", arr);
+
           resolve(data);
         })
-        .catch(reject);
+        .catch(() => {
+          reject("get data failed");
+        });
     });
   };
 
   const refreshDataset = () => {
-    result.current = 10;
+    console.log("refreshing data");
+    result.current = 0;
     setHasMore(true);
     setData([]);
+    seen.current = new Set();
   };
 
   const updateDataset = (pollId) => {
@@ -285,7 +310,7 @@ export function SQLProvider({ children }) {
   };
 
   const handleFetchMoreData = () => {
-    //console.log("fetching more data ", result, data.length);
+    console.log("fetching more data ", result, data.length);
     if (data.length < result.current) {
       //console.log("cancel fetch more data");
       return;
@@ -296,15 +321,20 @@ export function SQLProvider({ children }) {
 
   const handleFetchMoreDataPromise = () => {
     return new Promise((resolve, reject) => {
-      //console.log("fetching more data ", result, data.length);
       if (data.length < result.current) {
         //console.log("cancel fetch more data");
         reject("cancel fetch more data");
       }
       result.current += 10;
+      console.log("fetching more data prom", result, data.length);
       getDataset()
-        .then(() => resolve("OK"))
-        .catch(reject);
+        .then(() => {
+          resolve("OK");
+        })
+        .catch(() => {
+          result.current -= 10;
+          reject("fetch data failed");
+        });
     });
   };
 

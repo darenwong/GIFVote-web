@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { Typography, CircularProgress } from "@material-ui/core";
 import { VariableSizeList } from "react-window";
 import Poll from "./components/Poll";
 import { useSQL } from "./contexts/SQLContext.js";
@@ -11,14 +11,26 @@ import { useWindowSize } from "@react-hook/window-size/throttled";
 const useStyles = makeStyles((theme) => ({
   root: {},
   loading: {
-    marginTop: "30vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: theme.spacing(2),
+  },
+  loadingText: {
+    padding: theme.spacing(1),
   },
 }));
 
-const Row = ({ index, style, data }) => {
+const Row = ({ index, style, isScrolling, data }) => {
   const classes = useStyles();
   if (index == data.length) {
-    return <Typography className={classes.loading}>Loading...</Typography>;
+    return (
+      <div style={{ ...style }} className={classes.loading}>
+        <CircularProgress />
+        <Typography className={classes.loadingText}>Loading...</Typography>
+      </div>
+    );
   }
 
   const {
@@ -68,6 +80,7 @@ const Row = ({ index, style, data }) => {
         comment_count={comment_count}
         num_likes={num_likes}
         user_liked={user_liked}
+        isScrolling={isScrolling}
       />
     </div>
   );
@@ -91,6 +104,7 @@ const FlexListAPI = () => {
   const [moreItemsLoading, setMoreItemsLoading] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [width, height] = useWindowSize();
+  const [loadingData, setLoadingData] = useState(false);
 
   const getItemSize = (index) => {
     // return a size for items[index]
@@ -99,17 +113,13 @@ const FlexListAPI = () => {
       return 120;
     }
 
-    let videoContainerWidth = Math.min(600, Math.max(300, width * 0.5)) * 0.9;
+    let videoContainerWidth = Math.min(600, Math.max(300, width * 0.5));
     let renderedVideoHeight =
       (data[index].gifHeight * videoContainerWidth) / data[index].gifWidth;
 
-    if (width >= 960) {
-      renderedVideoHeight += 100;
-    }
-
     //console.log(index, renderedVideoHeight, videoContainerWidth, width);
 
-    return renderedVideoHeight + 350;
+    return renderedVideoHeight + 273 + 40;
   };
 
   const itemCount = hasNextPage ? data.length + 1 : data.length;
@@ -127,11 +137,15 @@ const FlexListAPI = () => {
   };*/
 
   const loadMoreItems = (startIndex, stopIndex) => {
-    //console.log("loading more data", startIndex, stopIndex);
+    console.log("loading more data", startIndex, stopIndex);
+    if (stopIndex < data.length) {
+      console.log("cancel loading data", startIndex, stopIndex, data.length);
+      return;
+    }
     return new Promise((resolve) => {
       handleFetchMoreDataPromise()
         .then(() => {
-          //console.log("loaded more data");
+          console.log("loaded more data");
           resolve("OK");
         })
         .catch(() => {});
@@ -140,27 +154,27 @@ const FlexListAPI = () => {
   };
 
   return (
-    <InfiniteLoader
-      isItemLoaded={(index) =>
-        index < data.length && data[index] !== null && index != 0
-      }
-      itemCount={itemCount}
-      loadMoreItems={loadMoreItems}
-    >
-      {({ onItemsRendered, ref }) => (
-        <VariableSizeList
-          height={height}
-          width={width}
-          itemCount={itemCount}
-          onItemsRendered={onItemsRendered}
-          ref={ref}
-          itemSize={getItemSize}
-          itemData={data}
-        >
-          {Row}
-        </VariableSizeList>
-      )}
-    </InfiniteLoader>
+    <div>
+      <InfiniteLoader
+        isItemLoaded={(index) => index < data.length && data[index] !== null}
+        itemCount={itemCount}
+        loadMoreItems={loadMoreItems}
+      >
+        {({ onItemsRendered, ref }) => (
+          <VariableSizeList
+            height={height}
+            width={width}
+            itemCount={itemCount}
+            onItemsRendered={onItemsRendered}
+            ref={ref}
+            itemSize={getItemSize}
+            itemData={data}
+          >
+            {Row}
+          </VariableSizeList>
+        )}
+      </InfiniteLoader>
+    </div>
   );
 };
 

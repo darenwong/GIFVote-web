@@ -59,11 +59,11 @@ function PollPage({ personal, sortBy }) {
     setIsPersonal(personal);
     setSortBy(sortBy);
   }, [personal, sortBy]);
-
+  /*
   useEffect(() => {
     refreshDataset();
   }, [userId]);
-
+*/
   return (
     <div className={classes.root}>
       <div className={classes.infiniteList}>
