@@ -17,8 +17,15 @@ import SignInPage from "./components/SignInPage";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useSQL } from "./contexts/SQLContext";
 import { LocalDiningOutlined } from "@material-ui/icons";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import PollPage from "./components/PollPage";
+import UserPollPage from "./components/UserPollPage";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -46,7 +53,6 @@ function App() {
     userId,
     setSortBy,
   } = useSQL();
-
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(async () => {
@@ -82,6 +88,9 @@ function App() {
           </Route>
           <Route path="/latest">
             <PollPage personal={0} sortBy={"time"} />
+          </Route>
+          <Route path="/profile">
+            <UserPollPage personal={1} sortBy={"like"} />
           </Route>
           <Route path="/">
             <PollPage personal={0} sortBy={"vote"} />

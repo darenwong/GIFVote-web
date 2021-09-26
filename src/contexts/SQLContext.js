@@ -7,8 +7,8 @@ import React, {
 } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 const SQLContext = React.createContext();
-const ENDPOINT = "https://gif-vote.herokuapp.com";
-//const ENDPOINT = "http://localhost:8080";
+//const ENDPOINT = "https://gif-vote.herokuapp.com";
+const ENDPOINT = "http://localhost:8080";
 export function useSQL() {
   return useContext(SQLContext);
 }
@@ -19,21 +19,20 @@ export function SQLProvider({ children }) {
   const [data, setData] = useState([]);
   const result = useRef(0);
   const [hasMore, setHasMore] = useState(true);
-  const [isPersonal, setIsPersonal] = useState(0);
+  const [isPersonal, setIsPersonal] = useState({ state: 0, createdBy: "507" });
   const [userId, setUserId] = useState("507");
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
   const [isLoadingData, setIsLoadingData] = useState(false);
   const seen = useRef(new Set());
 
-  /*
   useEffect(() => {
     //console.log("change", JSON.parse(JSON.stringify(data)));
     if (data.length == 0) {
-      getDataset();
+      //getDataset();
     }
   }, [data]);
-*/
+
   useEffect(() => {
     console.log("isPersonal, sortBy setting changed");
     refreshDataset();
@@ -69,7 +68,7 @@ export function SQLProvider({ children }) {
 
   const getDataset = () => {
     return new Promise((resolve, reject) => {
-      console.log("getting data", data.length, seen);
+      console.log("getting dataset", data.length, isPersonal);
       /*
       if (data.length > result.current || !hasMore) {
         return;
@@ -77,7 +76,7 @@ export function SQLProvider({ children }) {
 
       //console.log("calling API", result.current);
       fetch(
-        `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal}&sortBy=${sortBy}`
+        `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal.state}&sortBy=${sortBy}&createdBy=${isPersonal.createdBy}`
       )
         .then((res) => res.json())
         .then((results) => {
@@ -96,6 +95,7 @@ export function SQLProvider({ children }) {
               votecount: voteCount,
               totalvotecount: totalVoteCount,
               created_by,
+              user_id,
               user_avatar,
               created_at,
               isvoted_bool: isVoted_bool,
@@ -118,6 +118,7 @@ export function SQLProvider({ children }) {
                 gifWidth,
                 totalVoteCount,
                 created_by,
+                user_id,
                 user_avatar,
                 created_at,
                 options: [],
@@ -208,7 +209,7 @@ export function SQLProvider({ children }) {
       //console.log("calling Update API");
       //console.log("before before", JSON.parse(JSON.stringify(data)));
       fetch(
-        `${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}&isPersonal=${isPersonal}`
+        `${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}&isPersonal=${isPersonal.state}`
       )
         .then((res) => res.json())
         .then((results) => {
@@ -227,6 +228,7 @@ export function SQLProvider({ children }) {
               votecount: voteCount,
               totalvotecount: totalVoteCount,
               created_by,
+              user_id,
               user_avatar,
               created_at,
               isvoted_bool: isVoted_bool,
@@ -245,6 +247,7 @@ export function SQLProvider({ children }) {
                 gifWidth,
                 totalVoteCount,
                 created_by,
+                user_id,
                 user_avatar,
                 created_at,
                 options: [],

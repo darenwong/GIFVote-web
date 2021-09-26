@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   Card,
+  CardMedia,
   Collapse,
   Dialog,
   Divider,
@@ -21,6 +22,7 @@ import {
   ListItemIcon,
   Tooltip,
 } from "@material-ui/core";
+import { NavLink } from "react-router-dom";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
@@ -266,15 +268,21 @@ const Poll = React.memo(
       <Card className={classes.root} variant="outlined">
         <CardContent>
           <Box className={classes.titleBox}>
-            <ListItemAvatar>
-              <Avatar
-                alt={"Guest"}
-                className={classes.avatar}
-                src={user_avatar}
-              >
-                <AccountCircle />
-              </Avatar>
-            </ListItemAvatar>
+            <NavLink
+              className={classes.passiveLink}
+              activeClassName={classes.activeLink}
+              to={`/profile?user=${user_id}`}
+            >
+              <ListItemAvatar>
+                <Avatar
+                  alt={"Guest"}
+                  className={classes.avatar}
+                  src={user_avatar}
+                >
+                  <AccountCircle />
+                </Avatar>
+              </ListItemAvatar>
+            </NavLink>
             <Tooltip title={title}>
               <ListItemText
                 className={classes.titleText}
@@ -380,6 +388,22 @@ const GIFComponent = ({
             muted={true}
             playsinline={true}
             light={gifimage}
+            fallback={
+              <CardMedia
+                component="img"
+                alt="fallback"
+                width={videoContainerWidth}
+                height={renderedVideoHeight}
+                image={gifimage}
+              />
+            }
+            config={{
+              file: {
+                attributes: {
+                  poster: { gifimage },
+                },
+              },
+            }}
           />
         </div>
       </Waypoint>

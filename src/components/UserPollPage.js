@@ -8,7 +8,7 @@ import { useSQL } from "../contexts/SQLContext.js";
 import { VariableSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import FlexListAPI from "../FlexListAPI.js";
-
+import { useLocation } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   root: {},
   paper: {
@@ -38,7 +38,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function PollPage({ personal, sortBy }) {
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+function UserPollPage({ personal, sortBy }) {
   const classes = useStyles();
   const [pollPointer, setPollPointer] = useState(0);
   const {
@@ -54,10 +57,12 @@ function PollPage({ personal, sortBy }) {
     userId,
     setSortBy,
   } = useSQL();
+  let query = useQuery();
 
   useEffect(() => {
-    setIsPersonal({ state: personal, user: "507" });
+    setIsPersonal({ state: personal, createdBy: query.get("user") });
     setSortBy(sortBy);
+    console.log("profile is", query.get("user"));
   }, [personal, sortBy]);
   /*
   useEffect(() => {
@@ -67,7 +72,7 @@ function PollPage({ personal, sortBy }) {
   return (
     <div className={classes.root}>
       <div className={classes.infiniteList}>
-        <FlexListAPI />
+        <FlexListAPI personal={personal} />
       </div>
       <div className={classes.newPollDialog}>
         <PollForm />
@@ -76,4 +81,4 @@ function PollPage({ personal, sortBy }) {
   );
 }
 
-export default PollPage;
+export default UserPollPage;

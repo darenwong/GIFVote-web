@@ -38,7 +38,7 @@ const Row = ({ index, style, isScrolling, data }) => {
     gifimage,
     gifHeight,
     gifWidth,
-    userId: user_id,
+    user_id,
     poll_text,
     created_by,
     user_avatar,
@@ -86,7 +86,7 @@ const Row = ({ index, style, isScrolling, data }) => {
   );
 };
 
-const FlexListAPI = () => {
+const FlexListAPI = ({ personal }) => {
   const {
     data,
     getUserData,
@@ -122,7 +122,7 @@ const FlexListAPI = () => {
     return renderedVideoHeight + 273 + 40;
   };
 
-  const itemCount = hasNextPage ? data.length + 1 : data.length;
+  const itemCount = hasMore ? data.length + 1 : data.length;
 
   /*
   const loadMoreItems = (startIndex, stopIndex) => {
@@ -137,7 +137,13 @@ const FlexListAPI = () => {
   };*/
 
   const loadMoreItems = (startIndex, stopIndex) => {
-    console.log("loading more data", startIndex, stopIndex);
+    console.log(
+      "loading more data",
+      startIndex,
+      stopIndex,
+      personal,
+      isPersonal
+    );
     if (stopIndex < data.length) {
       console.log("cancel loading data", startIndex, stopIndex, data.length);
       return;
@@ -162,7 +168,7 @@ const FlexListAPI = () => {
       >
         {({ onItemsRendered, ref }) => (
           <VariableSizeList
-            height={height}
+            height={height - 64}
             width={width}
             itemCount={itemCount}
             onItemsRendered={onItemsRendered}
