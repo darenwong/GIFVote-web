@@ -1,21 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography, CircularProgress } from "@material-ui/core";
+import {
+  Typography,
+  CircularProgress,
+  List,
+  ListItemIcon,
+  ListItemText,
+  ListItem,
+} from "@material-ui/core";
 import { VariableSizeList } from "react-window";
 import Poll from "./components/Poll";
 import { useSQL } from "./contexts/SQLContext.js";
 import InfiniteLoader from "react-window-infinite-loader";
 //import useWindowDimensions from "./hooks/useWindowDimensions";
 import { useWindowSize } from "@react-hook/window-size/throttled";
+import AutoSizer from "react-virtualized-auto-sizer";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
   loading: {
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: theme.spacing(2),
   },
   loadingText: {
     padding: theme.spacing(1),
@@ -27,8 +34,14 @@ const Row = ({ index, style, isScrolling, data }) => {
   if (index == data.length) {
     return (
       <div style={{ ...style }} className={classes.loading}>
-        <CircularProgress />
-        <Typography className={classes.loadingText}>Loading...</Typography>
+        <List>
+          <ListItem>
+            <ListItemIcon>
+              <CircularProgress />
+            </ListItemIcon>
+            <ListItemText primary="Loading..." />
+          </ListItem>
+        </List>
       </div>
     );
   }
@@ -57,7 +70,35 @@ const Row = ({ index, style, isScrolling, data }) => {
   const customStyle = {
     display: "flex",
     justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
   };
+  return (
+    <div style={{ ...style, ...customStyle }}>
+      <Poll
+        gifURL={gifURL}
+        gifimage={gifimage}
+        gifHeight={gifHeight}
+        gifWidth={gifWidth}
+        key={index}
+        user_id={user_id}
+        title={poll_text}
+        created_by={created_by}
+        user_avatar={user_avatar}
+        created_at={created_at}
+        winner={winner}
+        chartData={chartData}
+        data={voteData}
+        poll_id={poll_id}
+        isVoted_bool={isVoted_bool}
+        totalVoteCount={totalVoteCount}
+        comment_count={comment_count}
+        num_likes={num_likes}
+        user_liked={user_liked}
+        isScrolling={isScrolling}
+      />
+    </div>
+  );
   return (
     <div style={{ ...style, ...customStyle }}>
       <Poll
@@ -86,7 +127,7 @@ const Row = ({ index, style, isScrolling, data }) => {
   );
 };
 
-const FlexListAPI = ({ personal }) => {
+const FlexListAPI = ({ personal, userProfileId }) => {
   const {
     data,
     getUserData,
@@ -95,8 +136,6 @@ const FlexListAPI = ({ personal }) => {
     refreshDataset,
     handleFetchMoreData,
     handleFetchMoreDataPromise,
-    isPersonal,
-    setIsPersonal,
     hasMore,
     userId,
     setSortBy,
@@ -105,6 +144,10 @@ const FlexListAPI = ({ personal }) => {
   const [hasNextPage, setHasNextPage] = useState(true);
   const [width, height] = useWindowSize();
   const [loadingData, setLoadingData] = useState(false);
+
+  useEffect(() => {
+    refreshDataset();
+  }, []);
 
   const getItemSize = (index) => {
     // return a size for items[index]
@@ -137,19 +180,15 @@ const FlexListAPI = ({ personal }) => {
   };*/
 
   const loadMoreItems = (startIndex, stopIndex) => {
-    console.log(
-      "loading more data",
-      startIndex,
-      stopIndex,
-      personal,
-      isPersonal
-    );
+    console.log("loading more data", startIndex, stopIndex, personal);
     if (stopIndex < data.length) {
       console.log("cancel loading data", startIndex, stopIndex, data.length);
       return;
     }
     return new Promise((resolve) => {
-      handleFetchMoreDataPromise()
+      handleFetchMoreDataPromise({
+        isPersonal: { state: personal, createdBy: userProfileId },
+      })
         .then(() => {
           console.log("loaded more data");
           resolve("OK");
@@ -160,26 +199,32 @@ const FlexListAPI = ({ personal }) => {
   };
 
   return (
-    <div>
-      <InfiniteLoader
-        isItemLoaded={(index) => index < data.length && data[index] !== null}
-        itemCount={itemCount}
-        loadMoreItems={loadMoreItems}
-      >
-        {({ onItemsRendered, ref }) => (
-          <VariableSizeList
-            height={height - 64}
-            width={width}
+    <div style={{ flex: "1 1 auto" }}>
+      <AutoSizer>
+        {({ height, width }) => (
+          <InfiniteLoader
+            isItemLoaded={(index) =>
+              index < data.length && data[index] !== null
+            }
             itemCount={itemCount}
-            onItemsRendered={onItemsRendered}
-            ref={ref}
-            itemSize={getItemSize}
-            itemData={data}
+            loadMoreItems={loadMoreItems}
           >
-            {Row}
-          </VariableSizeList>
+            {({ onItemsRendered, ref }) => (
+              <VariableSizeList
+                height={height - 64}
+                width={width}
+                itemCount={itemCount}
+                onItemsRendered={onItemsRendered}
+                ref={ref}
+                itemSize={getItemSize}
+                itemData={data}
+              >
+                {Row}
+              </VariableSizeList>
+            )}
+          </InfiniteLoader>
         )}
-      </InfiniteLoader>
+      </AutoSizer>
     </div>
   );
 };

@@ -19,7 +19,7 @@ export function SQLProvider({ children }) {
   const [data, setData] = useState([]);
   const result = useRef(0);
   const [hasMore, setHasMore] = useState(true);
-  const [isPersonal, setIsPersonal] = useState({ state: 0, createdBy: "507" });
+  //const  isPersonal = useRef({ state: 0, createdBy: "507" });
   const [userId, setUserId] = useState("507");
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
@@ -29,15 +29,15 @@ export function SQLProvider({ children }) {
   useEffect(() => {
     //console.log("change", JSON.parse(JSON.stringify(data)));
     if (data.length == 0) {
-      //getDataset();
+      //getDataset({ isPersonal: { state: 0, createdBy: 1 } });
     }
   }, [data]);
-
+  /*
   useEffect(() => {
     console.log("isPersonal, sortBy setting changed");
     refreshDataset();
   }, [isPersonal, sortBy]);
-
+*/
   useEffect(() => {
     console.log("data changed", data);
   }, [data]);
@@ -66,7 +66,24 @@ export function SQLProvider({ children }) {
     });
   };
 
-  const getDataset = () => {
+  const getUserProfile = ({ user_id }) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${ENDPOINT}/api-get-profile/?user_id=${user_id}`, {
+        method: "GET",
+      })
+        .then((res) => {
+          //console.log(res);
+          return res.json();
+        })
+        .then((results) => {
+          console.log("user profile = ", results);
+          resolve(results);
+        })
+        .catch(reject);
+    });
+  };
+
+  const getDataset = ({ isPersonal }) => {
     return new Promise((resolve, reject) => {
       console.log("getting dataset", data.length, isPersonal);
       /*
@@ -201,16 +218,13 @@ export function SQLProvider({ children }) {
     result.current = 0;
     setHasMore(true);
     setData([]);
-    seen.current = new Set();
   };
 
   const updateDataset = (pollId) => {
     return new Promise((resolve, reject) => {
       //console.log("calling Update API");
       //console.log("before before", JSON.parse(JSON.stringify(data)));
-      fetch(
-        `${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}&isPersonal=${isPersonal.state}`
-      )
+      fetch(`${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}`)
         .then((res) => res.json())
         .then((results) => {
           //console.log("success", results);
@@ -322,7 +336,7 @@ export function SQLProvider({ children }) {
     getDataset();
   };
 
-  const handleFetchMoreDataPromise = () => {
+  const handleFetchMoreDataPromise = ({ isPersonal }) => {
     return new Promise((resolve, reject) => {
       if (data.length < result.current) {
         //console.log("cancel fetch more data");
@@ -330,7 +344,7 @@ export function SQLProvider({ children }) {
       }
       result.current += 10;
       console.log("fetching more data prom", result, data.length);
-      getDataset()
+      getDataset({ isPersonal })
         .then(() => {
           resolve("OK");
         })
@@ -433,13 +447,12 @@ export function SQLProvider({ children }) {
       value={{
         data,
         getUserData,
+        getUserProfile,
         getDataset,
         updateDataset,
         refreshDataset,
         handleFetchMoreData,
         handleFetchMoreDataPromise,
-        isPersonal,
-        setIsPersonal,
         hasMore,
         userId,
         setSortBy,

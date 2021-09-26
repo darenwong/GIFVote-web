@@ -1,4 +1,12 @@
-import { Button, Grid, Paper } from "@material-ui/core";
+import {
+  Button,
+  Card,
+  Grid,
+  Paper,
+  Avatar,
+  CardHeader,
+  Box,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
 import Poll from "./Poll.js";
@@ -9,8 +17,12 @@ import { VariableSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import FlexListAPI from "../FlexListAPI.js";
 import { useLocation } from "react-router-dom";
+import ProfilePage from "./ProfilePage.js";
+
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+    height: "100%",
+  },
   paper: {
     padding: theme.spacing(2),
     textAlign: "center",
@@ -32,9 +44,11 @@ const useStyles = makeStyles((theme) => ({
     right: "5vmin",
   },
   infiniteList: {
+    height: "100%",
     marginTop: theme.spacing(8),
     display: "flex",
     justifyContent: "center",
+    flexDirection: "column",
   },
 }));
 
@@ -44,26 +58,13 @@ function useQuery() {
 function UserPollPage({ personal, sortBy }) {
   const classes = useStyles();
   const [pollPointer, setPollPointer] = useState(0);
-  const {
-    data,
-    getUserData,
-    getDataset,
-    updateDataset,
-    refreshDataset,
-    handleFetchMoreData,
-    isPersonal,
-    setIsPersonal,
-    hasMore,
-    userId,
-    setSortBy,
-  } = useSQL();
   let query = useQuery();
-
+  /*
   useEffect(() => {
     setIsPersonal({ state: personal, createdBy: query.get("user") });
     setSortBy(sortBy);
     console.log("profile is", query.get("user"));
-  }, [personal, sortBy]);
+  }, [personal, sortBy]);*/
   /*
   useEffect(() => {
     refreshDataset();
@@ -72,7 +73,8 @@ function UserPollPage({ personal, sortBy }) {
   return (
     <div className={classes.root}>
       <div className={classes.infiniteList}>
-        <FlexListAPI personal={personal} />
+        <ProfilePage userProfileId={query.get("user")} />
+        <FlexListAPI personal={personal} userProfileId={query.get("user")} />
       </div>
       <div className={classes.newPollDialog}>
         <PollForm />

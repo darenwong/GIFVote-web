@@ -10,7 +10,9 @@ import InfiniteLoader from "react-window-infinite-loader";
 import FlexListAPI from "../FlexListAPI.js";
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+    height: "100%",
+  },
   paper: {
     padding: theme.spacing(2),
     textAlign: "center",
@@ -32,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
     right: "5vmin",
   },
   infiniteList: {
+    height: "100%",
     marginTop: theme.spacing(8),
     display: "flex",
     justifyContent: "center",
@@ -48,18 +51,16 @@ function PollPage({ personal, sortBy }) {
     updateDataset,
     refreshDataset,
     handleFetchMoreData,
-    isPersonal,
-    setIsPersonal,
     hasMore,
     userId,
     setSortBy,
   } = useSQL();
-
+  /*
   useEffect(() => {
     setIsPersonal({ state: personal, user: "507" });
     setSortBy(sortBy);
   }, [personal, sortBy]);
-  /*
+
   useEffect(() => {
     refreshDataset();
   }, [userId]);
@@ -67,7 +68,7 @@ function PollPage({ personal, sortBy }) {
   return (
     <div className={classes.root}>
       <div className={classes.infiniteList}>
-        <FlexListAPI />
+        <FlexListAPI personal={personal} userProfileId={null} />
       </div>
       <div className={classes.newPollDialog}>
         <PollForm />
