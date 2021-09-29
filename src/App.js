@@ -90,10 +90,13 @@ function App() {
             <PollPage personal={0} sortBy={"time"} />
           </Route>
           <Route path="/profile">
-            <UserPollPage personal={1} sortBy={"like"} />
+            <UserPollPage personal={1} sortBy={"like"} isFollowing={0} />
+          </Route>
+          <Route path="/home">
+            <PollPage personal={0} sortBy={"time"} isFollowing={1} />
           </Route>
           <Route path="/">
-            <PollPage personal={0} sortBy={"vote"} />
+            <PollPage personal={0} sortBy={"vote"} isFollowing={0} />
           </Route>
         </Switch>
       </div>

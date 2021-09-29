@@ -33,16 +33,20 @@ import WhatshotIcon from "@material-ui/icons/Whatshot";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import ScheduleIcon from "@material-ui/icons/Schedule";
 import FaceIcon from "@material-ui/icons/Face";
+import HomeIcon from "@material-ui/icons/Home";
+import HomeOutlinedIcon from "@material-ui/icons/HomeOutlined";
+import ExploreIcon from "@material-ui/icons/Explore";
+import ExploreOutlinedIcon from "@material-ui/icons/ExploreOutlined";
 import GIFVoteLogo from "../images/gif_vote_logo3.png";
 
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
   menuButton: {
-    marginRight: theme.spacing(2),
+    marginRight: theme.spacing(0),
   },
   title: {
     flexGrow: 1,
@@ -72,15 +76,29 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
   },
   logo: {
-    height: "35px",
+    height: "32px",
     width: "auto",
     maxWidth: "50vw",
-    margin: theme.spacing(1),
+    padding: theme.spacing(1),
   },
   icon: {
     marginRight: theme.spacing(0.5),
     width: 20,
     height: 20,
+  },
+  topButtonContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: "auto",
+  },
+  topButton: {
+    padding: theme.spacing(1),
+  },
+  topButtonIcon: {
+    height: "24px",
+    width: "24px",
   },
 }));
 
@@ -90,6 +108,8 @@ export default function MenuAppBar({ isOpen, setIsOpen }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+
+  const history = useHistory();
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
@@ -119,6 +139,45 @@ export default function MenuAppBar({ isOpen, setIsOpen }) {
           <MenuDrawer />
           <img className={classes.logo} alt="GIF Vote" src={GIFVoteLogo} />
           {false && <SimpleBreadcrumbs />}
+          <div className={classes.topButtonContainer}>
+            <IconButton
+              size="large"
+              aria-label="home"
+              color="inherit"
+              className={classes.topButton}
+              onClick={() => history.push("home")}
+            >
+              <HomeOutlinedIcon className={classes.topButtonIcon} />
+            </IconButton>
+            <IconButton
+              size="large"
+              aria-label="explore"
+              color="inherit"
+              className={classes.topButton}
+              onClick={() => history.push("explore")}
+            >
+              <ExploreOutlinedIcon className={classes.topButtonIcon} />
+            </IconButton>
+            {isAuthenticated && (
+              <IconButton
+                size="large"
+                aria-label="explore"
+                color="inherit"
+                className={classes.topButton}
+              >
+                <Avatar
+                  src={user.picture}
+                  alt={user.name}
+                  className={classes.topButtonIcon}
+                />
+              </IconButton>
+            )}
+            {!isAuthenticated && (
+              <Button variant="contained" color="primary">
+                Log In
+              </Button>
+            )}
+          </div>
         </Toolbar>
       </AppBar>
     </div>

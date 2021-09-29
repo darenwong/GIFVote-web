@@ -66,11 +66,14 @@ export function SQLProvider({ children }) {
     });
   };
 
-  const getUserProfile = ({ user_id }) => {
+  const getUserProfile = ({ user_id, followee_id }) => {
     return new Promise((resolve, reject) => {
-      fetch(`${ENDPOINT}/api-get-profile/?user_id=${user_id}`, {
-        method: "GET",
-      })
+      fetch(
+        `${ENDPOINT}/api-get-profile/?user_id=${user_id}&followee_id=${followee_id}`,
+        {
+          method: "GET",
+        }
+      )
         .then((res) => {
           //console.log(res);
           return res.json();
@@ -82,8 +85,62 @@ export function SQLProvider({ children }) {
         .catch(reject);
     });
   };
+  const getUserFollowers = ({ user_id, followee_id }) => {
+    return new Promise((resolve, reject) => {
+      fetch(
+        `${ENDPOINT}/api-get-followers/?user_id=${user_id}&followee_id=${followee_id}`,
+        {
+          method: "GET",
+        }
+      )
+        .then((res) => {
+          //console.log(res);
+          return res.json();
+        })
+        .then((results) => {
+          console.log("user follower = ", results);
+          resolve(results);
+        })
+        .catch(reject);
+    });
+  };
+  const getUserFollowing = ({ user_id, follower_id }) => {
+    return new Promise((resolve, reject) => {
+      fetch(
+        `${ENDPOINT}/api-get-following/?user_id=${user_id}&follower_id=${follower_id}`,
+        {
+          method: "GET",
+        }
+      )
+        .then((res) => {
+          //console.log(res);
+          return res.json();
+        })
+        .then((results) => {
+          console.log("user following = ", results);
+          resolve(results);
+        })
+        .catch(reject);
+    });
+  };
+  const getUserNumPost = ({ user_id }) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${ENDPOINT}/api-get-numpost/?user_id=${user_id}`, {
+        method: "GET",
+      })
+        .then((res) => {
+          //console.log(res);
+          return res.json();
+        })
+        .then((results) => {
+          console.log("user numpost = ", results);
+          resolve(results);
+        })
+        .catch(reject);
+    });
+  };
 
-  const getDataset = ({ isPersonal }) => {
+  const getDataset = ({ isPersonal, isFollowing }) => {
     return new Promise((resolve, reject) => {
       console.log("getting dataset", data.length, isPersonal);
       /*
@@ -93,7 +150,7 @@ export function SQLProvider({ children }) {
 
       //console.log("calling API", result.current);
       fetch(
-        `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal.state}&sortBy=${sortBy}&createdBy=${isPersonal.createdBy}`
+        `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal.state}&sortBy=${sortBy}&createdBy=${isPersonal.createdBy}&isFollowing=${isFollowing}`
       )
         .then((res) => res.json())
         .then((results) => {
@@ -336,7 +393,7 @@ export function SQLProvider({ children }) {
     getDataset();
   };
 
-  const handleFetchMoreDataPromise = ({ isPersonal }) => {
+  const handleFetchMoreDataPromise = ({ isPersonal, isFollowing }) => {
     return new Promise((resolve, reject) => {
       if (data.length < result.current) {
         //console.log("cancel fetch more data");
@@ -344,7 +401,7 @@ export function SQLProvider({ children }) {
       }
       result.current += 10;
       console.log("fetching more data prom", result, data.length);
-      getDataset({ isPersonal })
+      getDataset({ isPersonal, isFollowing })
         .then(() => {
           resolve("OK");
         })
@@ -352,6 +409,25 @@ export function SQLProvider({ children }) {
           result.current -= 10;
           reject("fetch data failed");
         });
+    });
+  };
+
+  const submitFollow = ({ follower_id, followee_id }) => {
+    return new Promise((resolve, reject) => {
+      console.log("submitFollow", follower_id, followee_id);
+      fetch(
+        `${ENDPOINT}/api-insert-follow/?follower_id=${follower_id}&followee_id=${followee_id}`,
+        { method: "POST" }
+      )
+        .then((res) => {
+          console.log(res);
+          res.json();
+        })
+        .then((results) => {
+          console.log("follow", results);
+          resolve("OK");
+        })
+        .catch(reject);
     });
   };
 
@@ -448,6 +524,9 @@ export function SQLProvider({ children }) {
         data,
         getUserData,
         getUserProfile,
+        getUserFollowers,
+        getUserFollowing,
+        getUserNumPost,
         getDataset,
         updateDataset,
         refreshDataset,
@@ -461,6 +540,7 @@ export function SQLProvider({ children }) {
         submitComment,
         submitLike,
         submitPoll,
+        submitFollow,
       }}
     >
       {children}

@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function PollPage({ personal, sortBy }) {
+function PollPage({ personal, sortBy, isFollowing }) {
   const classes = useStyles();
   const [pollPointer, setPollPointer] = useState(0);
   const {
@@ -63,12 +63,17 @@ function PollPage({ personal, sortBy }) {
 
   useEffect(() => {
     refreshDataset();
+    console.log("userId", userId);
   }, [userId]);
 */
   return (
     <div className={classes.root}>
       <div className={classes.infiniteList}>
-        <FlexListAPI personal={personal} userProfileId={null} />
+        <FlexListAPI
+          personal={personal}
+          userProfileId={null}
+          isFollowing={isFollowing}
+        />
       </div>
       <div className={classes.newPollDialog}>
         <PollForm />

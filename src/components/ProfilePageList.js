@@ -117,7 +117,7 @@ const ExpandMore = styled((props) => {
   }),
 }));
 
-const ProfilePage = ({ userProfileId }) => {
+const ProfilePageList = ({ userProfileId }) => {
   const classes = useStyles();
   const {
     data,
@@ -149,7 +149,7 @@ const ProfilePage = ({ userProfileId }) => {
 
   useEffect(() => {
     refreshProfile();
-  }, [userId]);
+  }, [userProfileId]);
 
   const refreshProfile = () => {
     getUserProfile({ user_id: userId, followee_id: userProfileId })
@@ -184,7 +184,7 @@ const ProfilePage = ({ userProfileId }) => {
       .then((res) => {
         console.log("num post", res);
         if (res && res.length > 0) {
-          setNumPost(res);
+          setNumPost(res[0].numpost);
         }
       })
       .catch(() => {});
@@ -214,121 +214,76 @@ const ProfilePage = ({ userProfileId }) => {
         open={open}
         handleClose={() => setOpen(false)}
       />
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <div className={classes.headerContainer}>
-          <div className={classes.avatar}>
-            <Avatar
-              alt={profile.name}
-              src={profile.avatar_url}
-              style={{ height: "15vw", width: "15vw" }}
+
+      <div className={classes.headerContainer}>
+        <div className={classes.avatar}>
+          <Avatar
+            alt={profile.name}
+            src={profile.avatar_url}
+            style={{
+              height: "10vw",
+              width: "10vw",
+              maxHeight: "112px",
+              maxWidth: "112px",
+              minHeight: "50px",
+              minWidth: "50px",
+            }}
+          />
+        </div>
+        <div className={classes.headerLeftContainer}>
+          <div className={classes.summary}>
+            <SummaryBox
+              data={numPost}
+              unit={"Posts"}
+              userId={userId}
+              handleFollow={handleFollow}
+            />
+            <SummaryBox
+              data={followers}
+              unit={"Followers"}
+              userId={userId}
+              handleFollow={handleFollow}
+            />
+            <SummaryBox
+              data={following}
+              unit={"Following"}
+              userId={userId}
+              handleFollow={handleFollow}
             />
           </div>
-          <div className={classes.headerLeftContainer}>
-            <div className={classes.summary}>
-              <SummaryBox
-                data={numPost}
-                unit={"Posts"}
-                userId={userId}
-                handleFollow={handleFollow}
-              />
-              <SummaryBox
-                data={followers}
-                unit={"Followers"}
-                userId={userId}
-                handleFollow={handleFollow}
-              />
-              <SummaryBox
-                data={following}
-                unit={"Following"}
-                userId={userId}
-                handleFollow={handleFollow}
-              />
-            </div>
-            <div className={classes.headerLeftButtonContainer}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className={classes.headerLeftButton}
-                onClick={() =>
-                  handleFollow({
-                    follower_id: userId,
-                    followee_id: userProfileId,
-                  })
-                }
-              >
-                {profile.is_following == 0 ? "Follow" : "Following"}
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                className={classes.headerLeftButton}
-              >
-                Message
-              </Button>
-            </div>
+          <div className={classes.headerLeftButtonContainer}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              className={classes.headerLeftButton}
+              onClick={() =>
+                handleFollow({
+                  follower_id: userId,
+                  followee_id: userProfileId,
+                })
+              }
+            >
+              {profile.is_following == 0 ? "Follow" : "Following"}
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              className={classes.headerLeftButton}
+            >
+              Message
+            </Button>
           </div>
         </div>
-        <div className={classes.descriptionBox}>
-          <Typography align="left">{profile.name}</Typography>
-          <Typography align="left">
-            Welcome to my page, just another guy who likes meme
-          </Typography>
-        </div>
-      </Collapse>
-      <div className={classes.expandMore}>
-        {!expanded && (
-          <div className={classes.expandMoreInner}>
-            <ListItem className={classes.listItem}>
-              <ListItemAvatar>
-                <Avatar alt={profile.name} src={profile.avatar_url} />
-              </ListItemAvatar>
-              <ListItemText primary={profile.name} />
-            </ListItem>
-            <div className={classes.expandMoreFollow}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                className={classes.headerLeftButton}
-                onClick={() =>
-                  handleFollow({
-                    follower_id: userId,
-                    followee_id: userProfileId,
-                  })
-                }
-              >
-                {profile.is_following == 0 ? "Follow" : "Following"}
-              </Button>
-            </div>
-            <div>
-              <ExpandMore
-                expand={expanded}
-                onClick={handleExpandClick}
-                aria-expanded={expanded}
-                aria-label="show more"
-              >
-                <ExpandMoreIcon />
-              </ExpandMore>
-            </div>
-          </div>
-        )}
-        {expanded && (
-          <ExpandMore
-            expand={expanded}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMoreIcon />
-          </ExpandMore>
-        )}
+      </div>
+      <div className={classes.descriptionBox}>
+        <Typography align="left">{profile.name}</Typography>
       </div>
     </Card>
   );
 };
-export default ProfilePage;
+export default ProfilePageList;
 
 const SummaryBox = ({ data, unit, handleFollow, userId }) => {
   const classes = useStyles();
@@ -346,7 +301,7 @@ const SummaryBox = ({ data, unit, handleFollow, userId }) => {
     } else {
       history.push(`/profile?user=${followee_id}`);
     }*/
-    //handleClose();
+    handleClose();
   };
 
   return (
@@ -419,7 +374,7 @@ const SummaryBox = ({ data, unit, handleFollow, userId }) => {
         }}
       >
         <Typography variant="subtitle1" style={{ fontWeight: 600 }}>
-          {data.length}
+          {unit == "Posts" ? data : data.length}
         </Typography>
         <Typography variant="subtitle2">{unit}</Typography>
       </div>

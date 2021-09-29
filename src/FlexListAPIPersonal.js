@@ -15,6 +15,8 @@ import InfiniteLoader from "react-window-infinite-loader";
 //import useWindowDimensions from "./hooks/useWindowDimensions";
 import { useWindowSize } from "@react-hook/window-size/throttled";
 import AutoSizer from "react-virtualized-auto-sizer";
+import ProfilePage from "./components/ProfilePage";
+import ProfilePageList from "./components/ProfilePageList";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -31,7 +33,16 @@ const useStyles = makeStyles((theme) => ({
 
 const Row = ({ index, style, isScrolling, data }) => {
   const classes = useStyles();
-  if (index == data.length) {
+
+  if (index == 0) {
+    return (
+      <div style={{ ...style }}>
+        <ProfilePageList userProfileId={data.userProfileId} />
+      </div>
+    );
+  }
+
+  if (index == data.list.length + 1) {
     return (
       <div style={{ ...style }} className={classes.loading}>
         <List>
@@ -65,7 +76,7 @@ const Row = ({ index, style, isScrolling, data }) => {
     comment_count,
     num_likes,
     user_liked,
-  } = data[index];
+  } = data.list[index - 1];
 
   const customStyle = {
     display: "flex",
@@ -127,7 +138,7 @@ const Row = ({ index, style, isScrolling, data }) => {
   );
 };
 
-const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
+const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
   const {
     data,
     getUserData,
@@ -152,21 +163,26 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
 
   const getItemSize = (index) => {
     // return a size for items[index]
-    if (index >= data.length) {
+    if (index >= data.length + 1) {
       //console.log(index);
       return 120;
     }
 
+    if (index == 0) {
+      return 240;
+    }
+
     let videoContainerWidth = Math.min(600, Math.max(300, width * 0.5));
     let renderedVideoHeight =
-      (data[index].gifHeight * videoContainerWidth) / data[index].gifWidth;
+      (data[index - 1].gifHeight * videoContainerWidth) /
+      data[index - 1].gifWidth;
 
     //console.log(index, renderedVideoHeight, videoContainerWidth, width);
 
     return renderedVideoHeight + 273 + 40;
   };
 
-  const itemCount = hasMore ? data.length + 1 : data.length;
+  const itemCount = hasMore ? data.length + 2 : data.length + 1;
 
   /*
   const loadMoreItems = (startIndex, stopIndex) => {
@@ -181,14 +197,7 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
   };*/
 
   const loadMoreItems = (startIndex, stopIndex) => {
-    console.log(
-      "loading more data",
-      startIndex,
-      stopIndex,
-      personal,
-      userId,
-      isFollowing
-    );
+    console.log("loading more data", startIndex, stopIndex, personal);
     if (stopIndex < data.length) {
       console.log("cancel loading data", startIndex, stopIndex, data.length);
       return;
@@ -226,7 +235,7 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
                 onItemsRendered={onItemsRendered}
                 ref={ref}
                 itemSize={getItemSize}
-                itemData={data}
+                itemData={{ list: data, userProfileId }}
               >
                 {Row}
               </VariableSizeList>
@@ -238,4 +247,4 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
   );
 };
 
-export default FlexListAPI;
+export default FlexListAPIPersonal;

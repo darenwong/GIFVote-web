@@ -16,8 +16,10 @@ import { useSQL } from "../contexts/SQLContext.js";
 import { VariableSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import FlexListAPI from "../FlexListAPI.js";
+import FlexListAPIPersonal from "../FlexListAPIPersonal.js";
 import { useLocation } from "react-router-dom";
 import ProfilePage from "./ProfilePage.js";
+import ProfilePageList from "./ProfilePageList.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -55,26 +57,31 @@ const useStyles = makeStyles((theme) => ({
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
-function UserPollPage({ personal, sortBy }) {
+function UserPollPage({ personal, sortBy, isFollowing }) {
   const classes = useStyles();
   const [pollPointer, setPollPointer] = useState(0);
   let query = useQuery();
+  const { refreshDataset } = useSQL();
   /*
   useEffect(() => {
     setIsPersonal({ state: personal, createdBy: query.get("user") });
     setSortBy(sortBy);
     console.log("profile is", query.get("user"));
   }, [personal, sortBy]);*/
-  /*
+
   useEffect(() => {
     refreshDataset();
-  }, [userId]);
-*/
+  }, [query.get("user")]);
+
   return (
     <div className={classes.root}>
       <div className={classes.infiniteList}>
-        <ProfilePage userProfileId={query.get("user")} />
-        <FlexListAPI personal={personal} userProfileId={query.get("user")} />
+        {false && <ProfilePageList userProfileId={query.get("user")} />}
+        <FlexListAPIPersonal
+          personal={personal}
+          userProfileId={query.get("user")}
+          isFollowing={isFollowing}
+        />
       </div>
       <div className={classes.newPollDialog}>
         <PollForm />
