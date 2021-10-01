@@ -157,6 +157,7 @@ const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
   const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
+    console.log("mounted", personal, userProfileId, isFollowing);
     refreshDataset();
     //loadMoreItems();
   }, []);
@@ -229,7 +230,7 @@ const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
           >
             {({ onItemsRendered, ref }) => (
               <VariableSizeList
-                height={height - 64}
+                height={width <= 600 ? height - 64 - 48 : height - 64}
                 width={width}
                 itemCount={itemCount}
                 onItemsRendered={onItemsRendered}

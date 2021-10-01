@@ -10,6 +10,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
+import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useSignIn } from "../contexts/SignInContext";
 import { useSQL } from "../contexts/SQLContext.js";
@@ -18,7 +19,7 @@ import { useHistory } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   root: {},
   button: {
-    transform: "scale(2)",
+    padding: theme.spacing(1),
   },
   optionContainer: {
     display: "flex",
@@ -123,13 +124,13 @@ export default function FormDialog() {
   return (
     <div className={classes.root}>
       <IconButton
-        color="primary"
+        color="inherit"
         aria-label="new poll"
         component="span"
         onClick={handleClickOpen}
         className={classes.button}
       >
-        <AddCircleIcon />
+        <AddBoxOutlinedIcon />
       </IconButton>
       <Dialog
         open={open}

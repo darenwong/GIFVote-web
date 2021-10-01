@@ -75,9 +75,11 @@ function PollPage({ personal, sortBy, isFollowing }) {
           isFollowing={isFollowing}
         />
       </div>
-      <div className={classes.newPollDialog}>
-        <PollForm />
-      </div>
+      {false && (
+        <div className={classes.newPollDialog}>
+          <PollForm />
+        </div>
+      )}
     </div>
   );
 }

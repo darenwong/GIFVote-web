@@ -271,7 +271,7 @@ const Poll = React.memo(
             <NavLink
               className={classes.passiveLink}
               activeClassName={classes.activeLink}
-              to={`/profile?user=${user_id}`}
+              to={`/profile/${user_id}`}
             >
               <ListItemAvatar>
                 <Avatar

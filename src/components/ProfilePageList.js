@@ -327,8 +327,8 @@ const SummaryBox = ({ data, unit, handleFollow, userId }) => {
                     component={Link}
                     to={
                       unit == "Followers"
-                        ? `/profile?user=${follower_id}`
-                        : `/profile?user=${followee_id}`
+                        ? `/profile/${follower_id}`
+                        : `/profile/${followee_id}`
                     }
                     onClick={() => {
                       handleClick({ follower_id, followee_id });

@@ -38,8 +38,9 @@ import HomeOutlinedIcon from "@material-ui/icons/HomeOutlined";
 import ExploreIcon from "@material-ui/icons/Explore";
 import ExploreOutlinedIcon from "@material-ui/icons/ExploreOutlined";
 import GIFVoteLogo from "../images/gif_vote_logo3.png";
+import PollForm from "./PollForm.js";
 
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, useHistory, useLocation } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -93,6 +94,19 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     marginLeft: "auto",
   },
+  topMainButtonContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: "auto",
+    top: "auto",
+    bottom: "0",
+    [theme.breakpoints.up("xs")]: {},
+    [theme.breakpoints.down("xs")]: {
+      display: "none",
+    },
+  },
   topButton: {
     padding: theme.spacing(1),
   },
@@ -100,14 +114,21 @@ const useStyles = makeStyles((theme) => ({
     height: "24px",
     width: "24px",
   },
+  loginTopButton: {
+    textTransform: "none",
+    margin: theme.spacing(1),
+  },
 }));
 
-export default function MenuAppBar({ isOpen, setIsOpen }) {
+export default function MenuAppBar() {
   const classes = useStyles();
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+
+  const [isOpen, setIsOpen] = useState(true);
+  const location = useLocation();
 
   const history = useHistory();
 
@@ -140,24 +161,37 @@ export default function MenuAppBar({ isOpen, setIsOpen }) {
           <img className={classes.logo} alt="GIF Vote" src={GIFVoteLogo} />
           {false && <SimpleBreadcrumbs />}
           <div className={classes.topButtonContainer}>
-            <IconButton
-              size="large"
-              aria-label="home"
-              color="inherit"
-              className={classes.topButton}
-              onClick={() => history.push("home")}
-            >
-              <HomeOutlinedIcon className={classes.topButtonIcon} />
-            </IconButton>
-            <IconButton
-              size="large"
-              aria-label="explore"
-              color="inherit"
-              className={classes.topButton}
-              onClick={() => history.push("explore")}
-            >
-              <ExploreOutlinedIcon className={classes.topButtonIcon} />
-            </IconButton>
+            <div className={classes.topMainButtonContainer}>
+              <IconButton
+                size="large"
+                aria-label="home"
+                color="inherit"
+                className={classes.topButton}
+                onClick={() => history.push("/home")}
+              >
+                {location.pathname == "/home" && (
+                  <HomeIcon className={classes.topButtonIcon} />
+                )}
+                {location.pathname != "/home" && (
+                  <HomeOutlinedIcon className={classes.topButtonIcon} />
+                )}
+              </IconButton>
+              <IconButton
+                size="large"
+                aria-label="explore"
+                color="inherit"
+                className={classes.topButton}
+                onClick={() => history.push("/")}
+              >
+                {location.pathname == "/" && (
+                  <ExploreIcon className={classes.topButtonIcon} />
+                )}
+                {location.pathname != "/" && (
+                  <ExploreOutlinedIcon className={classes.topButtonIcon} />
+                )}
+              </IconButton>
+              <PollForm />
+            </div>
             {isAuthenticated && (
               <IconButton
                 size="large"
@@ -173,7 +207,12 @@ export default function MenuAppBar({ isOpen, setIsOpen }) {
               </IconButton>
             )}
             {!isAuthenticated && (
-              <Button variant="contained" color="primary">
+              <Button
+                className={classes.loginTopButton}
+                variant="contained"
+                color="primary"
+                size="small"
+              >
                 Log In
               </Button>
             )}

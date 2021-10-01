@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
-function UserPollPage({ personal, sortBy, isFollowing }) {
+function UserPollPage({ personal, sortBy, isFollowing, userid }) {
   const classes = useStyles();
   const [pollPointer, setPollPointer] = useState(0);
   let query = useQuery();
@@ -79,13 +79,15 @@ function UserPollPage({ personal, sortBy, isFollowing }) {
         {false && <ProfilePageList userProfileId={query.get("user")} />}
         <FlexListAPIPersonal
           personal={personal}
-          userProfileId={query.get("user")}
+          userProfileId={userid}
           isFollowing={isFollowing}
         />
       </div>
-      <div className={classes.newPollDialog}>
-        <PollForm />
-      </div>
+      {false && (
+        <div className={classes.newPollDialog}>
+          <PollForm />
+        </div>
+      )}
     </div>
   );
 }

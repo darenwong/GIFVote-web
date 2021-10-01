@@ -26,6 +26,7 @@ import {
 } from "react-router-dom";
 import PollPage from "./components/PollPage";
 import UserPollPage from "./components/UserPollPage";
+import BotAppBar from "./components/BotBar";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -38,7 +39,6 @@ const userId = "2";
 function App() {
   const classes = useStyles();
   const [count, setCount] = useState(0);
-  const [isOpen, setIsOpen] = useState(true);
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const {
     data,
@@ -69,7 +69,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <TopBar isOpen={isOpen} setIsOpen={setIsOpen} />
+        <TopBar />
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={6000}
@@ -89,16 +89,30 @@ function App() {
           <Route path="/latest">
             <PollPage personal={0} sortBy={"time"} />
           </Route>
-          <Route path="/profile">
-            <UserPollPage personal={1} sortBy={"like"} isFollowing={0} />
-          </Route>
-          <Route path="/home">
-            <PollPage personal={0} sortBy={"time"} isFollowing={1} />
-          </Route>
+          <Route
+            exact
+            path="/profile/:userid"
+            render={(routeProps) => (
+              <UserPollPage
+                personal={1}
+                sortBy={"like"}
+                isFollowing={0}
+                key={routeProps.match.params.userid}
+                userid={routeProps.match.params.userid}
+              />
+            )}
+          ></Route>
+          <Route
+            path="/home"
+            render={() => (
+              <PollPage personal={0} sortBy={"time"} isFollowing={1} key={1} />
+            )}
+          ></Route>
           <Route path="/">
             <PollPage personal={0} sortBy={"vote"} isFollowing={0} />
           </Route>
         </Switch>
+        <BotAppBar />
       </div>
     </Router>
   );
