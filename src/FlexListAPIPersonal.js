@@ -7,10 +7,13 @@ import {
   ListItemIcon,
   ListItemText,
   ListItem,
+  IconButton,
 } from "@material-ui/core";
+import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import { VariableSizeList } from "react-window";
 import Poll from "./components/Poll";
 import { useSQL } from "./contexts/SQLContext.js";
+import { useHistory } from "react-router-dom";
 import InfiniteLoader from "react-window-infinite-loader";
 //import useWindowDimensions from "./hooks/useWindowDimensions";
 import { useWindowSize } from "@react-hook/window-size/throttled";
@@ -29,10 +32,20 @@ const useStyles = makeStyles((theme) => ({
   loadingText: {
     padding: theme.spacing(1),
   },
+  seeMore: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  seeMoreButton: {
+    margin: theme.spacing(1),
+  },
 }));
 
 const Row = ({ index, style, isScrolling, data }) => {
   const classes = useStyles();
+  const { hasMore } = useSQL();
+  const history = useHistory();
 
   if (index == 0) {
     return (
@@ -42,7 +55,25 @@ const Row = ({ index, style, isScrolling, data }) => {
     );
   }
 
-  if (index == data.list.length + 1) {
+  if (index == data.list.length + 1 && hasMore == false) {
+    return (
+      <div style={{ ...style }}>
+        <div className={classes.seeMore}>
+          <Typography>See more post</Typography>
+          <IconButton
+            variant="contained"
+            color="primary"
+            className={classes.seeMoreButton}
+            onClick={() => history.push("/")}
+          >
+            <KeyboardArrowRight />
+          </IconButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (index == data.list.length + 1 && hasMore == true) {
     return (
       <div style={{ ...style }} className={classes.loading}>
         <List>
@@ -183,7 +214,7 @@ const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
     return renderedVideoHeight + 273 + 40;
   };
 
-  const itemCount = hasMore ? data.length + 2 : data.length + 1;
+  const itemCount = hasMore ? data.length + 2 : data.length + 2;
 
   /*
   const loadMoreItems = (startIndex, stopIndex) => {

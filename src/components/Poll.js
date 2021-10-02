@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReactPlayer from "react-player/lazy";
+import "./styles/Poll.css";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -349,6 +350,7 @@ const GIFComponent = ({
   gifWidth,
   isScrolling,
 }) => {
+  const classes = useStyles();
   const [width, height] = useWindowSize();
   let videoContainerWidth = Math.min(600, Math.max(300, width * 0.5));
   let renderedVideoHeight = (gifHeight * videoContainerWidth) / gifWidth;
@@ -375,6 +377,8 @@ const GIFComponent = ({
         onEnter={handleEnterViewport}
         onLeave={handleExitViewport}
         fireOnRapidScroll={false}
+        topOffset="-100%"
+        bottomOffset="-100%"
       >
         <div>
           <ReactPlayer
@@ -388,6 +392,8 @@ const GIFComponent = ({
             muted={true}
             playsinline={true}
             light={gifimage}
+            className={classes.reactPlayer}
+            playIcon={<div />}
             fallback={
               <CardMedia
                 component="img"
@@ -400,7 +406,7 @@ const GIFComponent = ({
             config={{
               file: {
                 attributes: {
-                  poster: { gifimage },
+                  poster: gifimage,
                 },
               },
             }}
@@ -559,6 +565,7 @@ const LikeComments = ({
     if (expanded == false) {
       const results = await getComments(poll_id);
       if (results) {
+        console.log("comments", results);
         setComments(results);
       }
     }
@@ -645,11 +652,20 @@ const CommentList = ({ comments }) => {
   return (
     <List className={classes.list} dense>
       {comments.map(
-        ({ user_name, created_at, user_avatar, comment_text }, index) => (
+        (
+          { user_name, user_id, created_at, user_avatar, comment_text },
+          index
+        ) => (
           <ListItem key={index}>
-            <ListItemAvatar>
-              <Avatar src={user_avatar} />
-            </ListItemAvatar>
+            <NavLink
+              className={classes.passiveLink}
+              activeClassName={classes.activeLink}
+              to={`/profile/${user_id}`}
+            >
+              <ListItemAvatar>
+                <Avatar src={user_avatar} />
+              </ListItemAvatar>
+            </NavLink>
             <ListItemText
               secondary={user_name + " " + getDate(created_at) + " ago"}
               primary={comment_text}

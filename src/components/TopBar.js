@@ -39,6 +39,8 @@ import ExploreIcon from "@material-ui/icons/Explore";
 import ExploreOutlinedIcon from "@material-ui/icons/ExploreOutlined";
 import GIFVoteLogo from "../images/gif_vote_logo3.png";
 import PollForm from "./PollForm.js";
+import SignInPage from "./SignInPage.js";
+import { useSQL } from "../contexts/SQLContext";
 
 import { NavLink, useHistory, useLocation } from "react-router-dom";
 
@@ -124,10 +126,10 @@ export default function MenuAppBar() {
   const classes = useStyles();
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { userId } = useSQL();
+  const [open, setOpen] = useState(false);
 
-  const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
 
   const history = useHistory();
@@ -153,12 +155,26 @@ export default function MenuAppBar() {
     handleClose();
   };
 
+  const handleNavToHome = () => {
+    if (!isAuthenticated) {
+      setOpen(true);
+      return;
+    }
+    history.push("/home");
+  };
   return (
     <div className={classes.root}>
+      <SignInPage
+        signInMsg={"Sign in to view homepage"}
+        open={open}
+        handleClose={() => setOpen(false)}
+      />
       <AppBar position="fixed">
         <Toolbar className={classes.toolbar}>
           <MenuDrawer />
-          <img className={classes.logo} alt="GIF Vote" src={GIFVoteLogo} />
+          <IconButton onClick={() => history.push("/")}>
+            <img className={classes.logo} alt="GIF Vote" src={GIFVoteLogo} />
+          </IconButton>
           {false && <SimpleBreadcrumbs />}
           <div className={classes.topButtonContainer}>
             <div className={classes.topMainButtonContainer}>
@@ -167,7 +183,7 @@ export default function MenuAppBar() {
                 aria-label="home"
                 color="inherit"
                 className={classes.topButton}
-                onClick={() => history.push("/home")}
+                onClick={handleNavToHome}
               >
                 {location.pathname == "/home" && (
                   <HomeIcon className={classes.topButtonIcon} />
@@ -198,6 +214,7 @@ export default function MenuAppBar() {
                 aria-label="explore"
                 color="inherit"
                 className={classes.topButton}
+                onClick={() => history.push(`/profile/${userId}`)}
               >
                 <Avatar
                   src={user.picture}
@@ -212,6 +229,7 @@ export default function MenuAppBar() {
                 variant="contained"
                 color="primary"
                 size="small"
+                onClick={loginWithRedirect}
               >
                 Log In
               </Button>

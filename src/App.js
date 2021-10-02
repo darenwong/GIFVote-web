@@ -105,7 +105,12 @@ function App() {
           <Route
             path="/home"
             render={() => (
-              <PollPage personal={0} sortBy={"time"} isFollowing={1} key={1} />
+              <PollPage
+                personal={0}
+                sortBy={"time"}
+                isFollowing={1}
+                key={userId}
+              />
             )}
           ></Route>
           <Route path="/">

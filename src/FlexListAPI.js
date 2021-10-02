@@ -7,6 +7,7 @@ import {
   ListItemIcon,
   ListItemText,
   ListItem,
+  IconButton,
 } from "@material-ui/core";
 import { VariableSizeList } from "react-window";
 import Poll from "./components/Poll";
@@ -15,6 +16,8 @@ import InfiniteLoader from "react-window-infinite-loader";
 //import useWindowDimensions from "./hooks/useWindowDimensions";
 import { useWindowSize } from "@react-hook/window-size/throttled";
 import AutoSizer from "react-virtualized-auto-sizer";
+import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -27,11 +30,40 @@ const useStyles = makeStyles((theme) => ({
   loadingText: {
     padding: theme.spacing(1),
   },
+  seeMore: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  seeMoreButton: {
+    margin: theme.spacing(1),
+  },
 }));
 
 const Row = ({ index, style, isScrolling, data }) => {
   const classes = useStyles();
-  if (index == data.length) {
+  const { hasMore } = useSQL();
+  const history = useHistory();
+
+  if (index == data.length && hasMore == false) {
+    return (
+      <div style={{ ...style }}>
+        <div className={classes.seeMore}>
+          <Typography>See more post</Typography>
+          <IconButton
+            variant="contained"
+            color="primary"
+            className={classes.seeMoreButton}
+            onClick={() => history.push("/")}
+          >
+            <KeyboardArrowRight />
+          </IconButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (index == data.length && hasMore == true) {
     return (
       <div style={{ ...style }} className={classes.loading}>
         <List>
@@ -167,7 +199,7 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
     return renderedVideoHeight + 273 + 40;
   };
 
-  const itemCount = hasMore ? data.length + 1 : data.length;
+  const itemCount = hasMore ? data.length + 1 : data.length + 1;
 
   /*
   const loadMoreItems = (startIndex, stopIndex) => {

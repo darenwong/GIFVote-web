@@ -7,8 +7,8 @@ import React, {
 } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 const SQLContext = React.createContext();
-const ENDPOINT = "https://gif-vote.herokuapp.com";
-//const ENDPOINT = "http://localhost:8080";
+//const ENDPOINT = "https://gif-vote.herokuapp.com";
+const ENDPOINT = "http://localhost:8080";
 export function useSQL() {
   return useContext(SQLContext);
 }
@@ -56,7 +56,10 @@ export function SQLProvider({ children }) {
           console.log("userId = ", results);
           if (results && results[0] && results[0].id) {
             setUserId(String(results[0].id));
-            refreshDataset();
+
+            if (data.length != 0) {
+              refreshDataset();
+            }
           } else {
             logout();
           }
