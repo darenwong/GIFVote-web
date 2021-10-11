@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Box, Button, IconButton } from "@material-ui/core";
+import { Box, Button, CircularProgress, IconButton } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -10,15 +10,17 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
+import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
+import AddBoxIcon from "@material-ui/icons/AddBox";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSignIn } from "../contexts/SignInContext";
 import { useSQL } from "../contexts/SQLContext.js";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
+import SignInPage from "./SignInPage.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
   button: {
-    transform: "scale(2)",
+    padding: theme.spacing(1),
   },
   optionContainer: {
     display: "flex",
@@ -31,28 +33,35 @@ const useStyles = makeStyles((theme) => ({
   formButton: {
     textTransform: "none",
   },
+  circularProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: "-12px",
+    marginLeft: "-12px",
+  },
 }));
 
 export default function FormDialog() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [options, setOptions] = useState([
     { val: "", err: "" },
     { val: "", err: "" },
   ]);
   const [question, setQuestion] = useState({ val: "", err: "" });
   const { loginWithRedirect, isAuthenticated } = useAuth0();
-  const { setSignInOpen, setSignInMsg } = useSignIn();
   const { refreshDataset, submitPoll, userId } = useSQL();
   const history = useHistory();
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const location = useLocation();
   const handleClickOpen = () => {
     if (!isAuthenticated) {
-      setSignInMsg("Sign in to create poll");
-      setSignInOpen(true);
+      setOpen(true);
       return;
     }
-    setOpen(true);
+    setDialogOpen(true);
   };
 
   const handleClose = () => {
@@ -61,7 +70,7 @@ export default function FormDialog() {
       { val: "", err: "" },
     ]);
     setQuestion({ val: "", err: "" });
-    setOpen(false);
+    setDialogOpen(false);
   };
 
   const handleAddOption = () => {
@@ -79,7 +88,7 @@ export default function FormDialog() {
     let temp = [...options];
     temp[index] = { val: event.target.value, err: "" };
     setOptions(temp);
-    console.log(event.target.value, index);
+    //console.log(event.target.value, index);
   };
 
   const handleDeleteField = (event, index) => {
@@ -107,32 +116,43 @@ export default function FormDialog() {
     for (let i = 0; i < temp.length; i++) {
       temp[i] = temp[i].val.trim();
     }
-
+    setIsSubmitting(true);
     const response = await submitPoll({
       user_id: userId,
       question: question.val.trim(),
       options: JSON.stringify(temp),
     });
     if (response == "OK") {
-      refreshDataset();
+      //refreshDataset();
       handleClose();
-      history.push("/your");
+      if (location.pathname == `/profile/${userId}`) {
+        refreshDataset();
+      } else {
+        history.push(`/profile/${userId}`);
+      }
     }
+    setIsSubmitting(false);
   };
 
   return (
     <div className={classes.root}>
+      <SignInPage
+        signInMsg={"Sign in to create poll"}
+        open={open}
+        handleClose={() => setOpen(false)}
+      />
       <IconButton
-        color="primary"
+        color="inherit"
         aria-label="new poll"
         component="span"
         onClick={handleClickOpen}
         className={classes.button}
       >
-        <AddCircleIcon />
+        {dialogOpen && <AddBoxIcon />}
+        {!dialogOpen && <AddBoxOutlinedIcon />}
       </IconButton>
       <Dialog
-        open={open}
+        open={dialogOpen}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
       >
@@ -199,14 +219,24 @@ export default function FormDialog() {
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleCreatePoll}
-            color="primary"
-            variant="contained"
-            className={classes.formButton}
-          >
-            Create
-          </Button>
+          <Box style={{ position: "relative" }}>
+            <Button
+              onClick={handleCreatePoll}
+              color="primary"
+              variant="contained"
+              className={classes.formButton}
+              disabled={isSubmitting}
+            >
+              Create
+            </Button>
+
+            {isSubmitting == true && (
+              <CircularProgress
+                className={classes.circularProgress}
+                size={24}
+              />
+            )}
+          </Box>
         </DialogActions>
       </Dialog>
     </div>
