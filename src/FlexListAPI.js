@@ -10,7 +10,7 @@ import {
   IconButton,
 } from "@material-ui/core";
 import { VariableSizeList } from "react-window";
-import Poll from "./components/Poll";
+import Poll from "./components/poll/Poll";
 import { useSQL } from "./contexts/SQLContext.js";
 import InfiniteLoader from "react-window-infinite-loader";
 //import useWindowDimensions from "./hooks/useWindowDimensions";

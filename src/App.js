@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
-import Poll from "./components/Poll.js";
+import Poll from "./components/poll/Poll.jsx";
 import PollForm from "./components/PollForm.js";
 import DropdownMenu from "./components/DropdownMenu";
 import TopBar from "./components/TopBar";

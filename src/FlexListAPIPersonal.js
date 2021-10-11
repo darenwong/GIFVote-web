@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import { VariableSizeList } from "react-window";
-import Poll from "./components/Poll";
+import Poll from "./components/poll/Poll";
 import { useSQL } from "./contexts/SQLContext.js";
 import { useHistory } from "react-router-dom";
 import InfiniteLoader from "react-window-infinite-loader";

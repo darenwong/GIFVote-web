@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
-import Poll from "./Poll.js";
+import Poll from "./poll/Poll.jsx";
 import PollForm from "./PollForm.js";
 import FadeInSection from "./FadeInSection";
 import { useSQL } from "../contexts/SQLContext.js";
