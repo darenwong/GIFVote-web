@@ -27,7 +27,7 @@ import {
 } from "react-router-dom";
 import PollPage from "./components/PollPage";
 import UserPollPage from "./components/UserPollPage";
-import BotAppBar from "./components/BotBar";
+import BotBar from "./components/topBar/BotBar";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -113,7 +113,7 @@ function App() {
             <PollPage personal={0} sortBy={"vote"} isFollowing={0} />
           </Route>
         </Switch>
-        <BotAppBar />
+        <BotBar />
       </div>
     </Router>
   );
