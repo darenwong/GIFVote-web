@@ -50,9 +50,20 @@ const areEqual = (prev, cur) => {
   return JSON.stringify(prev.data) == JSON.stringify(cur.data);
 };
 
-const BarChart = ({ getElementAtEvent, data }) => {
-  return <Bar data={data} options={options} style={{ width: "100%" }} />;
-};
+const BarChart = React.memo(({ getElementAtEvent, data }) => {
+  return (
+    <Bar
+      data={data}
+      options={options}
+      style={{
+        width: "80%",
+        marginLeft: "auto",
+        marginRight: "auto",
+        overflow: "hidden",
+      }}
+    />
+  );
+}, areEqual);
 
 export default BarChart;
 /*

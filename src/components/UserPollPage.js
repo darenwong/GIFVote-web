@@ -1,4 +1,12 @@
-import { Button, Grid, Paper } from "@material-ui/core";
+import {
+  Button,
+  Card,
+  Grid,
+  Paper,
+  Avatar,
+  CardHeader,
+  Box,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
 import Poll from "./Poll.js";
@@ -8,6 +16,10 @@ import { useSQL } from "../contexts/SQLContext.js";
 import { VariableSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import FlexListAPI from "../FlexListAPI.js";
+import FlexListAPIPersonal from "../FlexListAPIPersonal.js";
+import { useLocation } from "react-router-dom";
+import ProfilePage from "./ProfilePage.js";
+import ProfilePageList from "./ProfilePageList.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,40 +51,36 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(8),
     display: "flex",
     justifyContent: "center",
+    flexDirection: "column",
   },
 }));
 
-function PollPage({ personal, sortBy, isFollowing }) {
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+function UserPollPage({ personal, sortBy, isFollowing, userid }) {
   const classes = useStyles();
   const [pollPointer, setPollPointer] = useState(0);
-  const {
-    data,
-    getUserData,
-    getDataset,
-    updateDataset,
-    refreshDataset,
-    handleFetchMoreData,
-    hasMore,
-    userId,
-    setSortBy,
-  } = useSQL();
+  let query = useQuery();
+  const { refreshDataset } = useSQL();
   /*
   useEffect(() => {
-    setIsPersonal({ state: personal, user: "507" });
+    setIsPersonal({ state: personal, createdBy: query.get("user") });
     setSortBy(sortBy);
-  }, [personal, sortBy]);
+    console.log("profile is", query.get("user"));
+  }, [personal, sortBy]);*/
 
   useEffect(() => {
     refreshDataset();
-    console.log("userId", userId);
-  }, [userId]);
-*/
+  }, [query.get("user")]);
+
   return (
     <div className={classes.root}>
       <div className={classes.infiniteList}>
-        <FlexListAPI
+        {false && <ProfilePageList userProfileId={query.get("user")} />}
+        <FlexListAPIPersonal
           personal={personal}
-          userProfileId={null}
+          userProfileId={userid}
           isFollowing={isFollowing}
         />
       </div>
@@ -85,4 +93,4 @@ function PollPage({ personal, sortBy, isFollowing }) {
   );
 }
 
-export default PollPage;
+export default UserPollPage;
