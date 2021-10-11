@@ -12,7 +12,7 @@ import { useEffect, useState, useRef } from "react";
 import Poll from "./components/Poll.js";
 import PollForm from "./components/PollForm.js";
 import DropdownMenu from "./components/DropdownMenu";
-import TopBar from "./components/TopBar";
+import TopBar from "./components/topBar/TopBar";
 import SignInPage from "./components/SignInPage";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useSQL } from "./contexts/SQLContext";
