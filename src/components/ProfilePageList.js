@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Card,
   Grid,
@@ -16,6 +17,7 @@ import {
   ListItemText,
   Dialog,
   DialogTitle,
+  DialogActions,
 } from "@material-ui/core";
 import { makeStyles, styled } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
@@ -146,7 +148,7 @@ const ProfilePageList = ({ userProfileId }) => {
   const [following, setFollowing] = useState([]);
   const [numPost, setNumPost] = useState(0);
   const [open, setOpen] = useState(false);
-
+  const [inboxOpen, setInboxOpen] = useState(false);
   useEffect(() => {
     refreshProfile();
   }, [userProfileId]);
@@ -154,7 +156,7 @@ const ProfilePageList = ({ userProfileId }) => {
   const refreshProfile = () => {
     getUserProfile({ user_id: userId, followee_id: userProfileId })
       .then((res) => {
-        console.log("profile", res);
+        //console.log("profile", res);
         if (res && res.length > 0) {
           setProfile({
             name: res[0].user_name,
@@ -166,7 +168,7 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
     getUserFollowers({ user_id: userId, followee_id: userProfileId })
       .then((res) => {
-        console.log("followers", res);
+        //console.log("followers", res);
         if (res && res.length > 0) {
           setFollowers(res);
         }
@@ -174,7 +176,7 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
     getUserFollowing({ user_id: userId, follower_id: userProfileId })
       .then((res) => {
-        console.log("following", res);
+        //console.log("following", res);
         if (res && res.length > 0) {
           setFollowing(res);
         }
@@ -182,7 +184,7 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
     getUserNumPost({ user_id: userProfileId })
       .then((res) => {
-        console.log("num post", res);
+        //console.log("num post", res);
         if (res && res.length > 0) {
           setNumPost(res[0].numpost);
         }
@@ -199,7 +201,7 @@ const ProfilePageList = ({ userProfileId }) => {
       setOpen(true);
       return;
     }
-    console.log("clicked");
+
     submitFollow({ follower_id, followee_id })
       .then(() => {
         refreshProfile();
@@ -207,13 +209,41 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
   };
 
+  const handleMessage = ({ from_id, to_id }) => {
+    if (!isAuthenticated) {
+      setOpen(true);
+      return;
+    }
+
+    setInboxOpen(true);
+  };
+
   return (
     <Card className={classes.root}>
       <SignInPage
-        signInMsg={"Sign in to follow"}
+        signInMsg={"Sign in to follow/message"}
         open={open}
         handleClose={() => setOpen(false)}
       />
+      <Dialog
+        open={inboxOpen}
+        onClose={() => {
+          setInboxOpen(false);
+        }}
+      >
+        <DialogTitle>Message feature coming soon!</DialogTitle>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setInboxOpen(false);
+            }}
+            color="primary"
+            style={{ textTransform: "none" }}
+          >
+            Back
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <div className={classes.headerContainer}>
         <div className={classes.avatar}>
@@ -251,30 +281,38 @@ const ProfilePageList = ({ userProfileId }) => {
               handleFollow={handleFollow}
             />
           </div>
-          <div className={classes.headerLeftButtonContainer}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              className={classes.headerLeftButton}
-              onClick={() =>
-                handleFollow({
-                  follower_id: userId,
-                  followee_id: userProfileId,
-                })
-              }
-            >
-              {profile.is_following == 0 ? "Follow" : "Following"}
-            </Button>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              className={classes.headerLeftButton}
-            >
-              Message
-            </Button>
-          </div>
+          {userId != userProfileId && (
+            <div className={classes.headerLeftButtonContainer}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                className={classes.headerLeftButton}
+                onClick={() =>
+                  handleFollow({
+                    follower_id: userId,
+                    followee_id: userProfileId,
+                  })
+                }
+              >
+                {profile.is_following == 0 ? "Follow" : "Following"}
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                className={classes.headerLeftButton}
+                onClick={() => {
+                  handleMessage({
+                    from_id: userId,
+                    to_id: userProfileId,
+                  });
+                }}
+              >
+                Message
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <div className={classes.descriptionBox}>

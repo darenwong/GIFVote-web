@@ -14,7 +14,7 @@ import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useSQL } from "../contexts/SQLContext.js";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import SignInPage from "./SignInPage.js";
 
 const useStyles = makeStyles((theme) => ({
@@ -55,6 +55,7 @@ export default function FormDialog() {
   const { refreshDataset, submitPoll, userId } = useSQL();
   const history = useHistory();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const location = useLocation();
   const handleClickOpen = () => {
     if (!isAuthenticated) {
       setOpen(true);
@@ -87,7 +88,7 @@ export default function FormDialog() {
     let temp = [...options];
     temp[index] = { val: event.target.value, err: "" };
     setOptions(temp);
-    console.log(event.target.value, index);
+    //console.log(event.target.value, index);
   };
 
   const handleDeleteField = (event, index) => {
@@ -124,7 +125,11 @@ export default function FormDialog() {
     if (response == "OK") {
       //refreshDataset();
       handleClose();
-      history.push(`/profile/${userId}`);
+      if (location.pathname == `/profile/${userId}`) {
+        refreshDataset();
+      } else {
+        history.push(`/profile/${userId}`);
+      }
     }
     setIsSubmitting(false);
   };

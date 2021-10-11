@@ -37,7 +37,7 @@ import HomeIcon from "@material-ui/icons/Home";
 import HomeOutlinedIcon from "@material-ui/icons/HomeOutlined";
 import ExploreIcon from "@material-ui/icons/Explore";
 import ExploreOutlinedIcon from "@material-ui/icons/ExploreOutlined";
-import GIFVoteLogo from "../images/gif_vote_logo3.png";
+import GIFVoteLogo from "../images/gif_vote_logo4.png";
 import PollForm from "./PollForm.js";
 import SignInPage from "./SignInPage.js";
 import { useSQL } from "../contexts/SQLContext";
@@ -172,9 +172,12 @@ export default function MenuAppBar() {
       <AppBar position="fixed">
         <Toolbar className={classes.toolbar}>
           <MenuDrawer />
-          <IconButton onClick={() => history.push("/")}>
-            <img className={classes.logo} alt="GIF Vote" src={GIFVoteLogo} />
-          </IconButton>
+          <img
+            className={classes.logo}
+            alt="GIF Vote"
+            src={GIFVoteLogo}
+            onClick={() => history.push("/")}
+          />
           {false && <SimpleBreadcrumbs />}
           <div className={classes.topButtonContainer}>
             <div className={classes.topMainButtonContainer}>
@@ -290,6 +293,9 @@ const MenuDrawer = () => {
   const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user, loginWithRedirect, logout } = useAuth0();
+  const { userId } = useSQL();
+
+  const history = useHistory();
 
   return (
     <>
@@ -311,7 +317,16 @@ const MenuDrawer = () => {
         <List>
           <ListItem>
             <ListItemAvatar>
-              {isAuthenticated && <Avatar src={user.picture} alt={user.name} />}
+              {isAuthenticated && (
+                <Avatar
+                  src={user.picture}
+                  alt={user.name}
+                  onClick={() => {
+                    history.push(`/profile/${userId}`);
+                    setIsOpen(false);
+                  }}
+                />
+              )}
               {!isAuthenticated && (
                 <Avatar alt={"Guest"}>
                   <AccountCircle />
@@ -347,19 +362,23 @@ const MenuDrawer = () => {
               secondary={"Help us improve GIF Votes"}
             />
           </ListItem>
-          <Divider />
-          <ListItem button>
-            <ListItemIcon>
-              <SettingsIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Settings"} />
-          </ListItem>
-          <ListItem button>
-            <ListItemIcon>
-              <InfoIcon />
-            </ListItemIcon>
-            <ListItemText primary={"About"} />
-          </ListItem>
+          {false && (
+            <>
+              <Divider />
+              <ListItem button>
+                <ListItemIcon>
+                  <SettingsIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Settings"} />
+              </ListItem>
+              <ListItem button>
+                <ListItemIcon>
+                  <InfoIcon />
+                </ListItemIcon>
+                <ListItemText primary={"About"} />
+              </ListItem>
+            </>
+          )}
         </List>
       </Drawer>
     </>

@@ -154,7 +154,7 @@ const ProfilePage = ({ userProfileId }) => {
   const refreshProfile = () => {
     getUserProfile({ user_id: userId, followee_id: userProfileId })
       .then((res) => {
-        console.log("profile", res);
+        //console.log("profile", res);
         if (res && res.length > 0) {
           setProfile({
             name: res[0].user_name,
@@ -166,7 +166,7 @@ const ProfilePage = ({ userProfileId }) => {
       .catch(() => {});
     getUserFollowers({ user_id: userId, followee_id: userProfileId })
       .then((res) => {
-        console.log("followers", res);
+        //console.log("followers", res);
         if (res && res.length > 0) {
           setFollowers(res);
         }
@@ -174,7 +174,7 @@ const ProfilePage = ({ userProfileId }) => {
       .catch(() => {});
     getUserFollowing({ user_id: userId, follower_id: userProfileId })
       .then((res) => {
-        console.log("following", res);
+        //console.log("following", res);
         if (res && res.length > 0) {
           setFollowing(res);
         }
@@ -182,7 +182,7 @@ const ProfilePage = ({ userProfileId }) => {
       .catch(() => {});
     getUserNumPost({ user_id: userProfileId })
       .then((res) => {
-        console.log("num post", res);
+        //console.log("num post", res);
         if (res && res.length > 0) {
           setNumPost(res);
         }
@@ -199,7 +199,7 @@ const ProfilePage = ({ userProfileId }) => {
       setOpen(true);
       return;
     }
-    console.log("clicked");
+    //console.log("clicked");
     submitFollow({ follower_id, followee_id })
       .then(() => {
         refreshProfile();

@@ -23,6 +23,7 @@ import {
   Route,
   Link,
   useLocation,
+  Redirect,
 } from "react-router-dom";
 import PollPage from "./components/PollPage";
 import UserPollPage from "./components/UserPollPage";
@@ -62,7 +63,7 @@ function App() {
 
       const results = await getUserData(user);
 
-      console.log("user data", results);
+      //console.log("user data", results);
     }
   }, [isAuthenticated]);
 
@@ -80,15 +81,6 @@ function App() {
 
         <SignInPage />
         <Switch>
-          <Route path="/your">
-            <PollPage personal={1} sortBy={"time"} />
-          </Route>
-          <Route path="/most-like">
-            <PollPage personal={0} sortBy={"like"} />
-          </Route>
-          <Route path="/latest">
-            <PollPage personal={0} sortBy={"time"} />
-          </Route>
           <Route
             exact
             path="/profile/:userid"
@@ -104,14 +96,18 @@ function App() {
           ></Route>
           <Route
             path="/home"
-            render={() => (
-              <PollPage
-                personal={0}
-                sortBy={"time"}
-                isFollowing={1}
-                key={userId}
-              />
-            )}
+            render={() => {
+              return isAuthenticated ? (
+                <PollPage
+                  personal={0}
+                  sortBy={"time"}
+                  isFollowing={1}
+                  key={userId}
+                />
+              ) : (
+                <Redirect to="/" />
+              );
+            }}
           ></Route>
           <Route path="/">
             <PollPage personal={0} sortBy={"vote"} isFollowing={0} />

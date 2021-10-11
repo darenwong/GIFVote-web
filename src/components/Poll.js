@@ -49,6 +49,7 @@ import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import { Waypoint } from "react-waypoint";
 import SignInPage from "./SignInPage.js";
+import Delete from "@material-ui/icons/Delete";
 
 const ENDPOINT = "https://gif-vote.herokuapp.com";
 
@@ -146,7 +147,8 @@ const useStyles = makeStyles((theme) => ({
   },
   list: {
     maxHeight: "50vh",
-    overflow: "scroll",
+    overflowY: "scroll",
+    overflowX: "hidden",
     backgroundColor: "#f5f5f5",
   },
   moreButton: {
@@ -291,7 +293,7 @@ const Poll = React.memo(
                 secondary={created_by + " " + getDate(created_at) + " ago"}
               />
             </Tooltip>
-            <OptionDropdown />
+            <OptionDropdown user_id={user_id} poll_id={poll_id} />
           </Box>
         </CardContent>
         <GIFComponent
@@ -377,8 +379,6 @@ const GIFComponent = ({
         onEnter={handleEnterViewport}
         onLeave={handleExitViewport}
         fireOnRapidScroll={false}
-        topOffset="-100%"
-        bottomOffset="-100%"
       >
         <div>
           <ReactPlayer
@@ -496,9 +496,10 @@ const VoteButton = ({ text, option_id, user_id, poll_id }) => {
   );
 };
 
-const OptionDropdown = () => {
+const OptionDropdown = ({ user_id, poll_id }) => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
+  const { userId, submitDeletePoll, refreshDataset } = useSQL();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -506,6 +507,15 @@ const OptionDropdown = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleDeletePoll = ({ poll_id }) => {
+    submitDeletePoll({ poll_id })
+      .then((res) => {
+        //console.log("deleted", res);
+        refreshDataset();
+      })
+      .catch(() => {});
   };
 
   return (
@@ -539,6 +549,22 @@ const OptionDropdown = () => {
             <ListItemText>Report</ListItemText>
           </Button>
         </MenuItem>
+        {user_id == userId && (
+          <MenuItem>
+            <Button
+              style={{ textTransform: "none" }}
+              color="secondary"
+              onClick={() => {
+                handleDeletePoll({ poll_id });
+              }}
+            >
+              <ListItemIcon>
+                <Delete color="secondary" />
+              </ListItemIcon>
+              <ListItemText>Delete</ListItemText>
+            </Button>
+          </MenuItem>
+        )}
       </Menu>
     </>
   );
@@ -565,7 +591,7 @@ const LikeComments = ({
     if (expanded == false) {
       const results = await getComments(poll_id);
       if (results) {
-        console.log("comments", results);
+        //console.log("comments", results);
         setComments(results);
       }
     }
@@ -720,7 +746,7 @@ const LikeButton = ({ user_liked, num_likes, poll_id, user_id }) => {
     if (!isAuthenticated) {
       //setSignInMsg("Sign in to like");
       setOpen(true);
-      console.log("like", isAuthenticated, open);
+      //console.log("like", isAuthenticated, open);
       return;
     }
 

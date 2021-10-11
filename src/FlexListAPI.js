@@ -178,7 +178,7 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
   const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
-    console.log("mounted1", personal, userProfileId, isFollowing);
+    //console.log("mounted1", personal, userProfileId, isFollowing);
     refreshDataset();
     //loadMoreItems();
   }, []);
@@ -214,16 +214,16 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
   };*/
 
   const loadMoreItems = (startIndex, stopIndex) => {
-    console.log(
+    /*console.log(
       "loading more data",
       startIndex,
       stopIndex,
       personal,
       userId,
       isFollowing
-    );
+    );*/
     if (stopIndex < data.length) {
-      console.log("cancel loading data", startIndex, stopIndex, data.length);
+      //console.log("cancel loading data", startIndex, stopIndex, data.length);
       return;
     }
     return new Promise((resolve) => {
@@ -232,7 +232,7 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
         isFollowing,
       })
         .then(() => {
-          console.log("loaded more data");
+          //console.log("loaded more data");
           resolve("OK");
         })
         .catch(() => {});
@@ -241,7 +241,7 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
   };
 
   return (
-    <div style={{ flex: "1 1 auto" }}>
+    <div style={{ flex: "1 1 auto", overflow: "hidden" }}>
       <AutoSizer>
         {({ height, width }) => (
           <InfiniteLoader

@@ -24,6 +24,7 @@ import ProfilePageList from "./ProfilePageList.js";
 const useStyles = makeStyles((theme) => ({
   root: {
     height: "100%",
+    overflow: "hidden",
   },
   paper: {
     padding: theme.spacing(2),

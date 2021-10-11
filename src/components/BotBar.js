@@ -40,6 +40,7 @@ import ExploreIcon from "@material-ui/icons/Explore";
 import ExploreOutlinedIcon from "@material-ui/icons/ExploreOutlined";
 import GIFVoteLogo from "../images/gif_vote_logo3.png";
 import PollForm from "./PollForm.js";
+import SignInPage from "./SignInPage.js";
 
 import { NavLink, useHistory, useLocation } from "react-router-dom";
 import AddBoxOutlined from "@material-ui/icons/AddBoxOutlined";
@@ -65,15 +66,25 @@ const useStyles = makeStyles((theme) => ({
 export default function BotAppBar() {
   const classes = useStyles();
   const [auth, setAuth] = React.useState(true);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
   const location = useLocation();
+  const [open, setOpen] = useState(false);
 
   const history = useHistory();
-
+  const handleNavToHome = () => {
+    if (!isAuthenticated) {
+      setOpen(true);
+      return;
+    }
+    history.push("/home");
+  };
   return (
     <div className={classes.root}>
+      <SignInPage
+        signInMsg={"Sign in to view homepage"}
+        open={open}
+        handleClose={() => setOpen(false)}
+      />
       <AppBar position="fixed" color="inherit" className={classes.appbar}>
         <Toolbar className={classes.toolBar} variant="dense">
           <IconButton
@@ -81,7 +92,7 @@ export default function BotAppBar() {
             aria-label="home"
             color="inherit"
             className={classes.topButton}
-            onClick={() => history.push("/home")}
+            onClick={handleNavToHome}
           >
             {location.pathname == "/home" && (
               <HomeIcon className={classes.topButtonIcon} />
