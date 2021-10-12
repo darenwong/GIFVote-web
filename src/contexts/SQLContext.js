@@ -1,4 +1,10 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 const SQLContext = React.createContext();
 const ENDPOINT = "https://gif-vote.herokuapp.com";
@@ -8,17 +14,32 @@ export function useSQL() {
 }
 
 export function SQLProvider({ children }) {
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [signInMsg, setSignInMsg] = useState("");
   const [data, setData] = useState([]);
   const result = useRef(0);
   const [hasMore, setHasMore] = useState(true);
+  //const  isPersonal = useRef({ state: 0, createdBy: "507" });
   const [userId, setUserId] = useState("507");
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const seen = useRef(new Set());
 
   useEffect(() => {
+    //console.log("change", JSON.parse(JSON.stringify(data)));
     if (data.length == 0) {
+      //getDataset({ isPersonal: { state: 0, createdBy: 1 } });
     }
+  }, [data]);
+  /*
+  useEffect(() => {
+    //console.log("isPersonal, sortBy setting changed");
+    refreshDataset();
+  }, [isPersonal, sortBy]);
+*/
+  useEffect(() => {
+    //console.log("data changed", data);
   }, [data]);
 
   const getUserData = (user) => {
@@ -28,9 +49,11 @@ export function SQLProvider({ children }) {
         { method: "POST" }
       )
         .then((res) => {
+          //console.log(res);
           return res.json();
         })
         .then((results) => {
+          //console.log("userId = ", results);
           if (results && results[0] && results[0].id) {
             setUserId(String(results[0].id));
 
@@ -55,15 +78,16 @@ export function SQLProvider({ children }) {
         }
       )
         .then((res) => {
+          //console.log(res);
           return res.json();
         })
         .then((results) => {
+          //console.log("user profile = ", results);
           resolve(results);
         })
         .catch(reject);
     });
   };
-
   const getUserFollowers = ({ user_id, followee_id }) => {
     return new Promise((resolve, reject) => {
       fetch(
@@ -73,15 +97,16 @@ export function SQLProvider({ children }) {
         }
       )
         .then((res) => {
+          //console.log(res);
           return res.json();
         })
         .then((results) => {
+          //console.log("user follower = ", results);
           resolve(results);
         })
         .catch(reject);
     });
   };
-
   const getUserFollowing = ({ user_id, follower_id }) => {
     return new Promise((resolve, reject) => {
       fetch(
@@ -91,24 +116,27 @@ export function SQLProvider({ children }) {
         }
       )
         .then((res) => {
+          //console.log(res);
           return res.json();
         })
         .then((results) => {
+          //console.log("user following = ", results);
           resolve(results);
         })
         .catch(reject);
     });
   };
-
   const getUserNumPost = ({ user_id }) => {
     return new Promise((resolve, reject) => {
       fetch(`${ENDPOINT}/api-get-numpost/?user_id=${user_id}`, {
         method: "GET",
       })
         .then((res) => {
+          //console.log(res);
           return res.json();
         })
         .then((results) => {
+          //console.log("user numpost = ", results);
           resolve(results);
         })
         .catch(reject);
@@ -117,11 +145,19 @@ export function SQLProvider({ children }) {
 
   const getDataset = ({ isPersonal, isFollowing }) => {
     return new Promise((resolve, reject) => {
+      //console.log("getting dataset", data.length, isPersonal);
+      /*
+      if (data.length > result.current || !hasMore) {
+        return;
+      }*/
+
+      //console.log("calling API", result.current);
       fetch(
         `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal.state}&sortBy=${sortBy}&createdBy=${isPersonal.createdBy}&isFollowing=${isFollowing}`
       )
         .then((res) => res.json())
         .then((results) => {
+          //console.log("success", results);
           let temp = {};
           for (let i = 0; i < results.length; i++) {
             let {
@@ -212,7 +248,7 @@ export function SQLProvider({ children }) {
           }
 
           let arr = Object.values(temp);
-
+          //console.log("sortBy", sortBy);
           switch (sortBy) {
             case "vote":
               arr.sort((a, b) => b.totalVoteCount - a.totalVoteCount);
@@ -227,6 +263,7 @@ export function SQLProvider({ children }) {
           if (arr.length == 0) {
             setHasMore(false);
           }
+          //console.log("new data", arr);
 
           resolve(data);
         })
@@ -237,6 +274,7 @@ export function SQLProvider({ children }) {
   };
 
   const refreshDataset = () => {
+    //console.log("refreshing data");
     result.current = 0;
     setHasMore(true);
     setData([]);
@@ -244,9 +282,12 @@ export function SQLProvider({ children }) {
 
   const updateDataset = (pollId) => {
     return new Promise((resolve, reject) => {
+      //console.log("calling Update API");
+      //console.log("before before", JSON.parse(JSON.stringify(data)));
       fetch(`${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}`)
         .then((res) => res.json())
         .then((results) => {
+          //console.log("success", results);
           let temp = {};
           for (let i = 0; i < results.length; i++) {
             let {
@@ -330,12 +371,14 @@ export function SQLProvider({ children }) {
           }
 
           let data_copy = JSON.parse(JSON.stringify(data));
+          //console.log("before", JSON.parse(JSON.stringify(data)));
           for (let i = 0; i < data_copy.length; i++) {
             if (data_copy[i].poll_id == pollId) {
               data_copy[i] = JSON.parse(JSON.stringify(temp[pollId]));
               break;
             }
           }
+          //console.log(data_copy);
           setData(JSON.parse(JSON.stringify(data_copy)));
           resolve(data_copy);
         })
@@ -344,7 +387,9 @@ export function SQLProvider({ children }) {
   };
 
   const handleFetchMoreData = () => {
+    //console.log("fetching more data ", result, data.length);
     if (data.length < result.current) {
+      //console.log("cancel fetch more data");
       return;
     }
     result.current += 10;
@@ -354,9 +399,11 @@ export function SQLProvider({ children }) {
   const handleFetchMoreDataPromise = ({ isPersonal, isFollowing }) => {
     return new Promise((resolve, reject) => {
       if (data.length < result.current) {
+        //console.log("cancel fetch more data");
         reject("cancel fetch more data");
       }
       result.current += 10;
+      //console.log("fetching more data prom", result, data.length);
       getDataset({ isPersonal, isFollowing })
         .then(() => {
           resolve("OK");
@@ -370,14 +417,17 @@ export function SQLProvider({ children }) {
 
   const submitFollow = ({ follower_id, followee_id }) => {
     return new Promise((resolve, reject) => {
+      //console.log("submitFollow", follower_id, followee_id);
       fetch(
         `${ENDPOINT}/api-insert-follow/?follower_id=${follower_id}&followee_id=${followee_id}`,
         { method: "POST" }
       )
         .then((res) => {
+          //console.log(res);
           res.json();
         })
         .then((results) => {
+          //console.log("follow", results);
           resolve("OK");
         })
         .catch(reject);
@@ -391,9 +441,11 @@ export function SQLProvider({ children }) {
         { method: "POST" }
       )
         .then((res) => {
+          //console.log(res);
           res.json();
         })
         .then((results) => {
+          //console.log("update", results);
           updateDataset(poll_id);
           resolve("OK");
         })
@@ -406,6 +458,7 @@ export function SQLProvider({ children }) {
       fetch(`${ENDPOINT}/api-comments/?poll_id=${poll_id}`)
         .then((res) => res.json())
         .then((results) => {
+          //console.log("comments", results);
           resolve(results);
         })
         .catch(reject);
@@ -422,6 +475,7 @@ export function SQLProvider({ children }) {
       )
         .then((res) => res.json())
         .then(async (results) => {
+          //console.log("comment inserted", results);
           updateDataset(poll_id);
           resolve("OK");
         })
@@ -439,6 +493,7 @@ export function SQLProvider({ children }) {
       )
         .then((res) => res.json())
         .then((results) => {
+          //console.log("like inserted", results, poll_id, user_id);
           updateDataset(poll_id);
           resolve("OK");
         })
@@ -455,9 +510,11 @@ export function SQLProvider({ children }) {
         }
       )
         .then((res) => {
+          //console.log("hello1", res);
           return res.json();
         })
         .then((results) => {
+          //console.log("hello2", results);
           resolve("OK");
         })
         .catch(reject);
@@ -470,9 +527,11 @@ export function SQLProvider({ children }) {
         method: "POST",
       })
         .then((res) => {
+          //console.log("hello1", res);
           return res.json();
         })
         .then((results) => {
+          //console.log("hello2", results);
           resolve("OK");
         })
         .catch(reject);
