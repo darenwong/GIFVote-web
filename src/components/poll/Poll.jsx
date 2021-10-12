@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import ReactPlayer from "react-player/lazy";
 import "../styles/Poll.css";
-import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Avatar,
@@ -9,7 +8,6 @@ import {
   Button,
   Card,
   CardMedia,
-  Collapse,
   Dialog,
   Divider,
   IconButton,
@@ -26,17 +24,10 @@ import {
 import { NavLink } from "react-router-dom";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import Typography from "@material-ui/core/Typography";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import BarChart from "./BarChart.jsx";
-import KeyboardArrowRightIcon from "@material-ui/icons/KeyboardArrowRight";
-import PersonIcon from "@material-ui/icons/Person";
-import ScheduleIcon from "@material-ui/icons/Schedule";
 import WhatshotIcon from "@material-ui/icons/Whatshot";
-import CommentOutlinedIcon from "@material-ui/icons/CommentOutlined";
 import SendIcon from "@material-ui/icons/Send";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSignIn } from "../../contexts/SignInContext";
 import { useSQL } from "../../contexts/SQLContext.js";
 import { useWindowSize } from "@react-hook/window-size/throttled";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
@@ -51,7 +42,6 @@ import { Waypoint } from "react-waypoint";
 import SignInPage from "../SignInPage.js";
 import Delete from "@material-ui/icons/Delete";
 
-const ENDPOINT = "https://gif-vote.herokuapp.com";
 
 const useStyles = makeStyles((theme) => ({
   root: {

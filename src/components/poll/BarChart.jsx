@@ -66,10 +66,3 @@ const BarChart = React.memo(({ getElementAtEvent, data }) => {
 }, areEqual);
 
 export default BarChart;
-/*
-const BarChart = React.memo(({ getElementAtEvent, data }) => {
-  return <Bar data={data} options={options} style={{ width: "100%" }} />;
-}, areEqual);
-
-export default BarChart;
-*/
