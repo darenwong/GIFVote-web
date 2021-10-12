@@ -1,49 +1,19 @@
 import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import {
-  AppBar,
-  Box,
-  Button,
-  Drawer,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemIcon,
-  Divider,
+  AppBar
 } from "@material-ui/core";
 import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
-import Avatar from "@material-ui/core/Avatar";
-import MenuIcon from "@material-ui/icons/Menu";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import Switch from "@material-ui/core/Switch";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormGroup from "@material-ui/core/FormGroup";
-import MenuItem from "@material-ui/core/MenuItem";
-import Menu from "@material-ui/core/Menu";
-import { Breadcrumbs } from "@material-ui/core";
-import DropdownMenu from "./DropdownMenu.js";
 import { useAuth0 } from "@auth0/auth0-react";
-import { BiLogIn, BiLogOut } from "react-icons/bi";
-import SettingsIcon from "@material-ui/icons/Settings";
-import InfoIcon from "@material-ui/icons/Info";
-import FeedbackIcon from "@material-ui/icons/Feedback";
-import WhatshotIcon from "@material-ui/icons/Whatshot";
-import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
-import ScheduleIcon from "@material-ui/icons/Schedule";
-import FaceIcon from "@material-ui/icons/Face";
 import HomeIcon from "@material-ui/icons/Home";
 import HomeOutlinedIcon from "@material-ui/icons/HomeOutlined";
 import ExploreIcon from "@material-ui/icons/Explore";
 import ExploreOutlinedIcon from "@material-ui/icons/ExploreOutlined";
-import GIFVoteLogo from "../images/gif_vote_logo3.png";
-import PollForm from "./PollForm.js";
-import SignInPage from "./SignInPage.js";
+import PollForm from "../PollForm.js";
+import SignInPage from "../SignInPage.js";
 
-import { NavLink, useHistory, useLocation } from "react-router-dom";
-import AddBoxOutlined from "@material-ui/icons/AddBoxOutlined";
+import { useHistory, useLocation } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -63,10 +33,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function BotAppBar() {
+export default function BotBar() {
   const classes = useStyles();
-  const [auth, setAuth] = React.useState(true);
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { isAuthenticated } = useAuth0();
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
