@@ -7,7 +7,6 @@ import App from "./App";
 
 import reportWebVitals from "./reportWebVitals";
 import { Auth0Provider } from "@auth0/auth0-react";
-import { SignInProvider } from "./contexts/SignInContext";
 import { SQLProvider } from "./contexts/SQLContext";
 import { defaults } from "react-chartjs-2";
 
@@ -44,13 +43,11 @@ ReactDOM.render(
     clientId={clientId}
     redirectUri={window.location.origin}
   >
-    <SignInProvider>
-      <SQLProvider>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
-      </SQLProvider>
-    </SignInProvider>
+    <SQLProvider>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </SQLProvider>
   </Auth0Provider>,
   document.getElementById("root")
 );
