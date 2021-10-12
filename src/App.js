@@ -25,8 +25,8 @@ import {
   useLocation,
   Redirect,
 } from "react-router-dom";
-import PollPage from "./components/PollPage";
-import UserPollPage from "./components/UserPollPage";
+import PollPage from "./pages/homePollPage/PollPage.jsx";
+import UserPollPage from "./pages/userPollPage/UserPollPage.jsx";
 import BotBar from "./components/topBar/BotBar";
 
 const useStyles = makeStyles((theme) => ({
