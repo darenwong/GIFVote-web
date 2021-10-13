@@ -9,15 +9,15 @@ import {
   ListItem,
   IconButton,
 } from "@material-ui/core";
+import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import { VariableSizeList } from "react-window";
-import Poll from "./components/Poll";
-import { useSQL } from "./contexts/SQLContext.js";
+import Poll from "../../components/poll/Poll";
+import { useSQL } from "../../contexts/SQLContext.js";
+import { useHistory } from "react-router-dom";
 import InfiniteLoader from "react-window-infinite-loader";
-//import useWindowDimensions from "./hooks/useWindowDimensions";
 import { useWindowSize } from "@react-hook/window-size/throttled";
 import AutoSizer from "react-virtualized-auto-sizer";
-import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
-import { useHistory } from "react-router-dom";
+import ProfilePageList from "./ProfilePageList";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -45,7 +45,15 @@ const Row = ({ index, style, isScrolling, data }) => {
   const { hasMore } = useSQL();
   const history = useHistory();
 
-  if (index == data.length && hasMore == false) {
+  if (index == 0) {
+    return (
+      <div style={{ ...style }}>
+        <ProfilePageList userProfileId={data.userProfileId} />
+      </div>
+    );
+  }
+
+  if (index == data.list.length + 1 && hasMore == false) {
     return (
       <div style={{ ...style }}>
         <div className={classes.seeMore}>
@@ -63,7 +71,7 @@ const Row = ({ index, style, isScrolling, data }) => {
     );
   }
 
-  if (index == data.length && hasMore == true) {
+  if (index == data.list.length + 1 && hasMore == true) {
     return (
       <div style={{ ...style }} className={classes.loading}>
         <List>
@@ -97,7 +105,7 @@ const Row = ({ index, style, isScrolling, data }) => {
     comment_count,
     num_likes,
     user_liked,
-  } = data[index];
+  } = data.list[index - 1];
 
   const customStyle = {
     display: "flex",
@@ -131,99 +139,46 @@ const Row = ({ index, style, isScrolling, data }) => {
       />
     </div>
   );
-  return (
-    <div style={{ ...style, ...customStyle }}>
-      <Poll
-        gifURL={gifURL}
-        gifimage={gifimage}
-        gifHeight={gifHeight}
-        gifWidth={gifWidth}
-        key={index}
-        user_id={user_id}
-        title={poll_text}
-        created_by={created_by}
-        user_avatar={user_avatar}
-        created_at={created_at}
-        winner={winner}
-        chartData={chartData}
-        data={voteData}
-        poll_id={poll_id}
-        isVoted_bool={isVoted_bool}
-        totalVoteCount={totalVoteCount}
-        comment_count={comment_count}
-        num_likes={num_likes}
-        user_liked={user_liked}
-        isScrolling={isScrolling}
-      />
-    </div>
-  );
 };
 
-const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
+const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
   const {
     data,
-    getUserData,
-    getDataset,
-    updateDataset,
     refreshDataset,
-    handleFetchMoreData,
     handleFetchMoreDataPromise,
     hasMore,
-    userId,
-    setSortBy,
   } = useSQL();
   const [moreItemsLoading, setMoreItemsLoading] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [width, height] = useWindowSize();
-  const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
-    //console.log("mounted1", personal, userProfileId, isFollowing);
     refreshDataset();
-    //loadMoreItems();
   }, []);
 
   const getItemSize = (index) => {
     // return a size for items[index]
-    if (index >= data.length) {
-      //console.log(index);
+    if (index >= data.length + 1) {
       return 120;
+    }
+
+    if (index == 0) {
+      return 240;
     }
 
     let videoContainerWidth = Math.min(600, Math.max(300, width * 0.5));
     let renderedVideoHeight =
-      (data[index].gifHeight * videoContainerWidth) / data[index].gifWidth;
-
-    //console.log(index, renderedVideoHeight, videoContainerWidth, width);
+      (data[index - 1].gifHeight * videoContainerWidth) /
+      data[index - 1].gifWidth;
 
     return renderedVideoHeight + 273 + 40;
   };
 
-  const itemCount = hasMore ? data.length + 1 : data.length + 1;
+  const itemCount = hasMore ? data.length + 2 : data.length + 2;
 
-  /*
-  const loadMoreItems = (startIndex, stopIndex) => {
-    //console.log("load more", startIndex, stopIndex);
-    setMoreItemsLoading(true);
-    getDataset()
-      .then(() => {
-        setMoreItemsLoading(false);
-      })
-      .catch(//console.log);
-    // method to fetch newer entries for the list
-  };*/
 
   const loadMoreItems = (startIndex, stopIndex) => {
-    /*console.log(
-      "loading more data",
-      startIndex,
-      stopIndex,
-      personal,
-      userId,
-      isFollowing
-    );*/
     if (stopIndex < data.length) {
-      //console.log("cancel loading data", startIndex, stopIndex, data.length);
       return;
     }
     return new Promise((resolve) => {
@@ -232,11 +187,9 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
         isFollowing,
       })
         .then(() => {
-          //console.log("loaded more data");
           resolve("OK");
         })
         .catch(() => {});
-      // method to fetch newer entries for the list
     });
   };
 
@@ -259,7 +212,7 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
                 onItemsRendered={onItemsRendered}
                 ref={ref}
                 itemSize={getItemSize}
-                itemData={data}
+                itemData={{ list: data, userProfileId }}
               >
                 {Row}
               </VariableSizeList>
@@ -271,4 +224,4 @@ const FlexListAPI = ({ personal, userProfileId, isFollowing }) => {
   );
 };
 
-export default FlexListAPI;
+export default FlexListAPIPersonal;
