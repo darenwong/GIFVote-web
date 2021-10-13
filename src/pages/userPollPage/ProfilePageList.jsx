@@ -1,16 +1,9 @@
 import {
-  Badge,
   Button,
   Card,
-  Grid,
-  Paper,
   Avatar,
-  CardHeader,
-  Box,
   Typography,
   Divider,
-  Collapse,
-  IconButton,
   List,
   ListItem,
   ListItemAvatar,
@@ -21,11 +14,10 @@ import {
 } from "@material-ui/core";
 import { makeStyles, styled } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
-import { useSQL } from "../contexts/SQLContext.js";
+import { useSQL } from "../../contexts/SQLContext.js";
 import { useAuth0 } from "@auth0/auth0-react";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { Link, useHistory } from "react-router-dom";
-import SignInPage from "./SignInPage.js";
+import SignInPage from "../../components/SignInPage.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -107,38 +99,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ExpandMore = styled((props) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
-  marginLeft: "auto",
-  margin: theme.spacing(1),
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
-}));
 
 const ProfilePageList = ({ userProfileId }) => {
   const classes = useStyles();
   const {
-    data,
-    getUserData,
     getUserProfile,
     getUserFollowers,
     getUserFollowing,
     getUserNumPost,
-    getDataset,
-    updateDataset,
-    refreshDataset,
-    handleFetchMoreData,
-    hasMore,
     userId,
-    setSortBy,
     submitFollow,
   } = useSQL();
   const { user, isAuthenticated } = useAuth0();
-  const [expanded, setExpanded] = useState(true);
   const [profile, setProfile] = useState({
     name: "",
     avatar_url: "",
@@ -156,7 +128,6 @@ const ProfilePageList = ({ userProfileId }) => {
   const refreshProfile = () => {
     getUserProfile({ user_id: userId, followee_id: userProfileId })
       .then((res) => {
-        //console.log("profile", res);
         if (res && res.length > 0) {
           setProfile({
             name: res[0].user_name,
@@ -168,7 +139,6 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
     getUserFollowers({ user_id: userId, followee_id: userProfileId })
       .then((res) => {
-        //console.log("followers", res);
         if (res && res.length > 0) {
           setFollowers(res);
         }
@@ -176,7 +146,6 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
     getUserFollowing({ user_id: userId, follower_id: userProfileId })
       .then((res) => {
-        //console.log("following", res);
         if (res && res.length > 0) {
           setFollowing(res);
         }
@@ -184,7 +153,6 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
     getUserNumPost({ user_id: userProfileId })
       .then((res) => {
-        //console.log("num post", res);
         if (res && res.length > 0) {
           setNumPost(res[0].numpost);
         }
@@ -192,9 +160,6 @@ const ProfilePageList = ({ userProfileId }) => {
       .catch(() => {});
   };
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
 
   const handleFollow = ({ follower_id, followee_id }) => {
     if (!isAuthenticated) {
@@ -333,12 +298,6 @@ const SummaryBox = ({ data, unit, handleFollow, userId }) => {
   };
 
   const handleClick = ({ follower_id, followee_id }) => {
-    /*history.push("/");
-    if (unit == "Followers") {
-      history.push(`/profile?user=${follower_id}`);
-    } else {
-      history.push(`/profile?user=${followee_id}`);
-    }*/
     handleClose();
   };
 
