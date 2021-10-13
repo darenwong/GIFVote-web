@@ -31,7 +31,6 @@ console.log("domain", domain, clientId);
 const theme = createTheme({
   palette: {
     primary: {
-      // Purple and green play nicely together.
       main: "#22bfa0",
     },
   },
