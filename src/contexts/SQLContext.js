@@ -33,7 +33,7 @@ export function SQLProvider({ children }) {
         .then((results) => {
           if (results && results[0] && results[0].id) {
             setUserId(String(results[0].id));
-
+            localStorage.setItem("userId", String(results[0].id));
             if (data.length != 0) {
               refreshDataset();
             }
@@ -495,6 +495,7 @@ export function SQLProvider({ children }) {
         handleFetchMoreDataPromise,
         hasMore,
         userId,
+        setUserId,
         setSortBy,
         submitVote,
         getComments,

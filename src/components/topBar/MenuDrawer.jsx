@@ -41,6 +41,11 @@ export default function MenuDrawer() {
 
   const history = useHistory();
 
+  const handleLogOut = () =>{
+    localStorage.removeItem('userId')
+    logout();
+  }
+
   return (
     <>
       <IconButton
@@ -83,7 +88,7 @@ export default function MenuDrawer() {
             />
 
             {isAuthenticated && (
-              <IconButton className={classes.loginButton} onClick={logout}>
+              <IconButton className={classes.loginButton} onClick={handleLogOut}>
                 <BiLogOut />
               </IconButton>
             )}
