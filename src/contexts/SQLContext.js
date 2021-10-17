@@ -223,7 +223,9 @@ export function SQLProvider({ children }) {
             case "like":
               arr.sort((a, b) => b.num_likes - a.num_likes);
           }
-          setData([...data, ...arr]);
+          setData((prevData) => {
+            return [...prevData, ...arr];
+          });
           if (arr.length == 0) {
             setHasMore(false);
           }
