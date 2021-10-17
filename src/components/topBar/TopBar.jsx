@@ -139,7 +139,7 @@ export default function MenuAppBar() {
               </IconButton>
               <PollForm />
             </div>
-            {isAuthenticated && (
+            {isAuthenticated || localStorage.getItem("userId") ? (
               <IconButton
                 size="large"
                 aria-label="explore"
@@ -148,13 +148,12 @@ export default function MenuAppBar() {
                 onClick={() => history.push(`/profile/${userId}`)}
               >
                 <Avatar
-                  src={user.picture}
-                  alt={user.name}
+                  src={user && user.picture}
+                  alt={user && user.name}
                   className={classes.topButtonIcon}
                 />
               </IconButton>
-            )}
-            {!isAuthenticated && (
+            ): (
               <Button
                 className={classes.loginTopButton}
                 variant="contained"

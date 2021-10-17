@@ -28,15 +28,25 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const { isAuthenticated, user } = useAuth0();
-  const { getUserData, userId } = useSQL();
+  const { getUserData, userId, setUserId } = useSQL();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  useEffect(() => {
+    const loggedInId = localStorage.getItem("userId");
+
+    if (loggedInId) {
+      setUserId(loggedInId);
+    }
+  }, []);
 
   useEffect(async () => {
     if (isAuthenticated) {
       console.log("authenticated!", user);
       setSnackbarOpen(true);
 
-      const results = await getUserData(user);
+      if (!localStorage.getItem("userId")) {
+        await getUserData(user);
+      }
     }
   }, [isAuthenticated]);
 
