@@ -7,6 +7,37 @@ export function useSQL() {
   return useContext(SQLContext);
 }
 
+const initialErrorState = {
+  getDataset: { open: false, message: "" },
+  getComments: { open: false, message: "" },
+  updateDataset: { open: false, message: "" },
+  submitFollow: {
+    open: false,
+    message: "An error occured. Failed to update your follow, please try again",
+  },
+  submitVote: {
+    open: false,
+    message: "An error occured. Failed to update your vote, please try again",
+  },
+  submitLike: {
+    open: false,
+    message: "An error occured. Failed to update your like, please try again",
+  },
+  submitComment: {
+    open: false,
+    message:
+      "An error occured. Failed to update your comment, please try again",
+  },
+  submitPoll: {
+    open: false,
+    message: "An error occured. Failed to create your poll, please try again",
+  },
+  submitDeletePoll: {
+    open: false,
+    message: "An error occured. Failed to delete your poll, please try again",
+  },
+};
+
 export function SQLProvider({ children }) {
   const [data, setData] = useState([]);
   const result = useRef(0);
@@ -15,6 +46,7 @@ export function SQLProvider({ children }) {
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
   const seen = useRef(new Set());
+  const [httpError, setHttpError] = useState(initialErrorState);
 
   useEffect(() => {
     if (data.length == 0) {
@@ -115,12 +147,30 @@ export function SQLProvider({ children }) {
     });
   };
 
+  const clearHttpError = (error) => {
+    setHttpError((prevState) => {
+      return { ...prevState, [error]: { ...prevState[error], open: false } };
+    });
+  };
+
+  const activateHttpError = (error) => {
+    setHttpError((prevState) => {
+      return { ...prevState, [error]: { ...prevState[error], open: true } };
+    });
+  };
+
   const getDataset = ({ isPersonal, isFollowing }) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("getDataset");
       fetch(
         `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal.state}&sortBy=${sortBy}&createdBy=${isPersonal.createdBy}&isFollowing=${isFollowing}`
       )
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("getDataset error");
+          }
+          return res.json();
+        })
         .then((results) => {
           let temp = {};
           for (let i = 0; i < results.length; i++) {
@@ -232,8 +282,9 @@ export function SQLProvider({ children }) {
 
           resolve(data);
         })
-        .catch(() => {
-          reject("get data failed");
+        .catch((error) => {
+          activateHttpError("getDataset");
+          reject(error);
         });
     });
   };
@@ -246,8 +297,14 @@ export function SQLProvider({ children }) {
 
   const updateDataset = (pollId) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("updateDataset");
       fetch(`${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("updateDataset error");
+          }
+          return res.json();
+        })
         .then((results) => {
           let temp = {};
           for (let i = 0; i < results.length; i++) {
@@ -341,7 +398,9 @@ export function SQLProvider({ children }) {
           setData(JSON.parse(JSON.stringify(data_copy)));
           resolve(data_copy);
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("updateDataset");
+        });
     });
   };
 
@@ -351,6 +410,7 @@ export function SQLProvider({ children }) {
     }
     result.current += 10;
     getDataset();
+    console.log("fetchMoreData");
   };
 
   const handleFetchMoreDataPromise = ({ isPersonal, isFollowing }) => {
@@ -365,6 +425,7 @@ export function SQLProvider({ children }) {
         })
         .catch(() => {
           result.current -= 10;
+          console.log("fetch data failed");
           reject("fetch data failed");
         });
     });
@@ -372,84 +433,122 @@ export function SQLProvider({ children }) {
 
   const submitFollow = ({ follower_id, followee_id }) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("submitFollow");
       fetch(
         `${ENDPOINT}/api-insert-follow/?follower_id=${follower_id}&followee_id=${followee_id}`,
         { method: "POST" }
       )
         .then((res) => {
-          res.json();
+          if (!res.ok) {
+            throw new Error("submitFollow error");
+          }
+          return res.json();
         })
         .then((results) => {
           resolve("OK");
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("submitFollow");
+        });
     });
   };
 
   const submitVote = ({ user_id, poll_id, option_id }) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("submitVote");
       fetch(
         `${ENDPOINT}/api-update/?user_id=${user_id}&poll_id=${poll_id}&option_id=${option_id}`,
         { method: "POST" }
       )
         .then((res) => {
-          res.json();
+          if (!res.ok) {
+            throw new Error("submitVote error");
+          }
+          return res.json();
         })
         .then((results) => {
           updateDataset(poll_id);
           resolve("OK");
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("submitVote");
+        });
     });
   };
 
   const getComments = (poll_id) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("getComments");
       fetch(`${ENDPOINT}/api-comments/?poll_id=${poll_id}`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("getComments error");
+          }
+          return res.json();
+        })
         .then((results) => {
           resolve(results);
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("getComments");
+          reject("getComments");
+        });
     });
   };
 
   const submitComment = ({ user_id, poll_id, comment }) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("submitComment");
       fetch(
         `${ENDPOINT}/api-insert-comments/?poll_id=${poll_id}&user_id=${user_id}&comment_text=${comment}`,
         {
           method: "POST",
         }
       )
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("submitComment error");
+          }
+          return res.json();
+        })
         .then(async (results) => {
           updateDataset(poll_id);
           resolve("OK");
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("submitComment");
+        });
     });
   };
 
   const submitLike = ({ poll_id, user_id }) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("submitLike");
       fetch(
         `${ENDPOINT}/api-insert-like/?poll_id=${poll_id}&user_id=${user_id}`,
         {
           method: "POST",
         }
       )
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("submitLike error");
+          }
+          return res.json();
+        })
         .then((results) => {
           updateDataset(poll_id);
           resolve("OK");
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("submitLike");
+        });
     });
   };
 
   const submitPoll = ({ user_id, question, options }) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("submitPoll");
       fetch(
         `${ENDPOINT}/api-new-poll/?user_id=${user_id}&question=${question}&options=${options}`,
         {
@@ -457,27 +556,38 @@ export function SQLProvider({ children }) {
         }
       )
         .then((res) => {
+          if (!res.ok) {
+            throw new Error("submitPoll error");
+          }
           return res.json();
         })
         .then((results) => {
           resolve("OK");
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("submitPoll");
+        });
     });
   };
 
   const submitDeletePoll = ({ poll_id }) => {
     return new Promise((resolve, reject) => {
+      clearHttpError("submitDeletePoll");
       fetch(`${ENDPOINT}/api-delete-poll/?poll_id=${poll_id}`, {
         method: "POST",
       })
         .then((res) => {
+          if (!res.ok) {
+            throw new Error("submitDeletePoll error");
+          }
           return res.json();
         })
         .then((results) => {
           resolve("OK");
         })
-        .catch(reject);
+        .catch((error) => {
+          activateHttpError("submitDeletePoll");
+        });
     });
   };
 
@@ -506,6 +616,8 @@ export function SQLProvider({ children }) {
         submitPoll,
         submitDeletePoll,
         submitFollow,
+        httpError,
+        clearHttpError,
       }}
     >
       {children}
