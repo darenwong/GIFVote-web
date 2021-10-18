@@ -8,6 +8,7 @@ import {
   ListItemAvatar,
 } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
+import { useSQL } from "../../../contexts/SQLContext";
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -21,9 +22,18 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CommentList ({ comments, getDate }) {
   const classes = useStyles();
+  const {httpError} = useSQL();
+
   return (
     <List className={classes.list} dense>
-      {comments.map(
+      {httpError['getComments'].open && 
+        <ListItem >
+          <ListItemText
+            primary={"Something Went Wrong"}
+          />
+        </ListItem>
+      }
+      {!httpError['getComments'].open && comments.map(
         (
           { user_name, user_id, created_at, user_avatar, comment_text },
           index
