@@ -1,4 +1,6 @@
 import React, { useEffect } from "react";
+import { useSelector, useDispatch } from 'react-redux';
+import { errorActions } from "../../store/errorSlice";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Button,
@@ -43,9 +45,12 @@ const useStyles = makeStyles((theme) => ({
 
 function ErrorModal({error}) {
   const classes = useStyles();
-  const { httpError, clearHttpError } = useSQL();
+  //const { httpError, clearHttpError } = useSQL();
+  const dispatch = useDispatch();
+
+  const httpError = useSelector((state) => state.error);
   const handleDismissHttpError = () =>{
-    clearHttpError(error);
+    dispatch(errorActions.clearHttpError(error));
   }
 
   return (

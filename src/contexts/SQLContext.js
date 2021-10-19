@@ -1,42 +1,15 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+
+import { errorActions } from "../store/errorSlice";
+import { useDispatch } from "react-redux";
+
 const SQLContext = React.createContext();
-const ENDPOINT = "https://gif-vote.herokuapp.com";
-//const ENDPOINT = "http://localhost:8080";
+//const ENDPOINT = "https://gif-vote.herokuapp.com";
+const ENDPOINT = "http://localhost:8080";
 export function useSQL() {
   return useContext(SQLContext);
 }
-
-const initialErrorState = {
-  getDataset: { open: false, message: "" },
-  getComments: { open: false, message: "" },
-  updateDataset: { open: false, message: "" },
-  submitFollow: {
-    open: false,
-    message: "An error occured. Failed to update your follow, please try again",
-  },
-  submitVote: {
-    open: false,
-    message: "An error occured. Failed to update your vote, please try again",
-  },
-  submitLike: {
-    open: false,
-    message: "An error occured. Failed to update your like, please try again",
-  },
-  submitComment: {
-    open: false,
-    message:
-      "An error occured. Failed to update your comment, please try again",
-  },
-  submitPoll: {
-    open: false,
-    message: "An error occured. Failed to create your poll, please try again",
-  },
-  submitDeletePoll: {
-    open: false,
-    message: "An error occured. Failed to delete your poll, please try again",
-  },
-};
 
 export function SQLProvider({ children }) {
   const [data, setData] = useState([]);
@@ -46,7 +19,8 @@ export function SQLProvider({ children }) {
   const { isAuthenticated, user, logout, isLoading } = useAuth0();
   const [sortBy, setSortBy] = useState("vote");
   const seen = useRef(new Set());
-  const [httpError, setHttpError] = useState(initialErrorState);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (data.length == 0) {
@@ -147,21 +121,9 @@ export function SQLProvider({ children }) {
     });
   };
 
-  const clearHttpError = (error) => {
-    setHttpError((prevState) => {
-      return { ...prevState, [error]: { ...prevState[error], open: false } };
-    });
-  };
-
-  const activateHttpError = (error) => {
-    setHttpError((prevState) => {
-      return { ...prevState, [error]: { ...prevState[error], open: true } };
-    });
-  };
-
   const getDataset = ({ isPersonal, isFollowing }) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("getDataset");
+      dispatch(errorActions.clearHttpError("getDataset"));
       fetch(
         `${ENDPOINT}/api-vote/?user_id=${userId}&result=${data.length}&isPersonal=${isPersonal.state}&sortBy=${sortBy}&createdBy=${isPersonal.createdBy}&isFollowing=${isFollowing}`
       )
@@ -283,7 +245,7 @@ export function SQLProvider({ children }) {
           resolve(data);
         })
         .catch((error) => {
-          activateHttpError("getDataset");
+          dispatch(errorActions.activateHttpError("getDataset"));
           reject(error);
         });
     });
@@ -297,7 +259,7 @@ export function SQLProvider({ children }) {
 
   const updateDataset = (pollId) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("updateDataset");
+      dispatch(errorActions.clearHttpError("updateDataset"));
       fetch(`${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}`)
         .then((res) => {
           if (!res.ok) {
@@ -402,7 +364,7 @@ export function SQLProvider({ children }) {
           resolve("OK");
         })
         .catch((error) => {
-          activateHttpError("updateDataset");
+          dispatch(errorActions.activateHttpError("updateDataset"));
         });
     });
   };
@@ -436,7 +398,7 @@ export function SQLProvider({ children }) {
 
   const submitFollow = ({ follower_id, followee_id }) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("submitFollow");
+      dispatch(errorActions.clearHttpError("submitFollow"));
       fetch(
         `${ENDPOINT}/api-insert-follow/?follower_id=${follower_id}&followee_id=${followee_id}`,
         { method: "POST" }
@@ -451,14 +413,14 @@ export function SQLProvider({ children }) {
           resolve("OK");
         })
         .catch((error) => {
-          activateHttpError("submitFollow");
+          dispatch(errorActions.activateHttpError("submitFollow"));
         });
     });
   };
 
   const submitVote = ({ user_id, poll_id, option_id }) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("submitVote");
+      dispatch(errorActions.clearHttpError("submitVote"));
       fetch(
         `${ENDPOINT}/api-update/?user_id=${user_id}&poll_id=${poll_id}&option_id=${option_id}`,
         { method: "POST" }
@@ -474,14 +436,14 @@ export function SQLProvider({ children }) {
           resolve("OK");
         })
         .catch((error) => {
-          activateHttpError("submitVote");
+          dispatch(errorActions.activateHttpError("submitVote"));
         });
     });
   };
 
   const getComments = (poll_id) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("getComments");
+      dispatch(errorActions.clearHttpError("getComments"));
       fetch(`${ENDPOINT}/api-comments/?poll_id=${poll_id}`)
         .then((res) => {
           if (!res.ok) {
@@ -493,7 +455,7 @@ export function SQLProvider({ children }) {
           resolve(results);
         })
         .catch((error) => {
-          activateHttpError("getComments");
+          dispatch(errorActions.activateHttpError("getComments"));
           reject("getComments");
         });
     });
@@ -501,7 +463,7 @@ export function SQLProvider({ children }) {
 
   const submitComment = ({ user_id, poll_id, comment }) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("submitComment");
+      dispatch(errorActions.clearHttpError("submitComment"));
       fetch(
         `${ENDPOINT}/api-insert-comments/?poll_id=${poll_id}&user_id=${user_id}&comment_text=${comment}`,
         {
@@ -519,14 +481,14 @@ export function SQLProvider({ children }) {
           resolve("OK");
         })
         .catch((error) => {
-          activateHttpError("submitComment");
+          dispatch(errorActions.activateHttpError("submitComment"));
         });
     });
   };
 
   const submitLike = ({ poll_id, user_id }) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("submitLike");
+      dispatch(errorActions.clearHttpError("submitLike"));
       fetch(
         `${ENDPOINT}/api-insert-like/?poll_id=${poll_id}&user_id=${user_id}`,
         {
@@ -544,14 +506,14 @@ export function SQLProvider({ children }) {
           resolve("OK");
         })
         .catch((error) => {
-          activateHttpError("submitLike");
+          dispatch(errorActions.activateHttpError("submitLike"));
         });
     });
   };
 
   const submitPoll = ({ user_id, question, options }) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("submitPoll");
+      dispatch(errorActions.clearHttpError("submitPoll"));
       fetch(
         `${ENDPOINT}/api-new-poll/?user_id=${user_id}&question=${question}&options=${options}`,
         {
@@ -568,14 +530,14 @@ export function SQLProvider({ children }) {
           resolve("OK");
         })
         .catch((error) => {
-          activateHttpError("submitPoll");
+          dispatch(errorActions.activateHttpError("submitPoll"));
         });
     });
   };
 
   const submitDeletePoll = ({ poll_id }) => {
     return new Promise((resolve, reject) => {
-      clearHttpError("submitDeletePoll");
+      dispatch(errorActions.clearHttpError("submitDeletePoll"));
       fetch(`${ENDPOINT}/api-delete-poll/?poll_id=${poll_id}`, {
         method: "POST",
       })
@@ -589,7 +551,7 @@ export function SQLProvider({ children }) {
           resolve("OK");
         })
         .catch((error) => {
-          activateHttpError("submitDeletePoll");
+          dispatch(errorActions.activateHttpError("submitDeletePoll"));
         });
     });
   };
@@ -619,8 +581,6 @@ export function SQLProvider({ children }) {
         submitPoll,
         submitDeletePoll,
         submitFollow,
-        httpError,
-        clearHttpError,
       }}
     >
       {children}

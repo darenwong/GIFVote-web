@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from 'react-redux';
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Typography,
@@ -41,7 +42,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Row = ({ index, style, isScrolling, data }) => {
   const classes = useStyles();
-  const { hasMore, httpError } = useSQL();
+  const { hasMore } = useSQL();
+  const httpError = useSelector(state=>state.error);
   const history = useHistory();
 
   if (index == data.length && hasMore == false) {

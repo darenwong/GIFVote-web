@@ -1,6 +1,7 @@
 import { Snackbar, Slide } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useSQL } from "./contexts/SQLContext";
 import {
@@ -29,8 +30,9 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const { isAuthenticated, user } = useAuth0();
-  const { getUserData, userId, setUserId, httpError } = useSQL();
+  const { getUserData, userId, setUserId } = useSQL();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const httpError = useSelector((state) => state.error);
 
   useEffect(() => {
     const loggedInId = localStorage.getItem("userId");
