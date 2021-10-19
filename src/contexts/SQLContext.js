@@ -331,15 +331,18 @@ export function SQLProvider({ children }) {
             });
           }
 
-          let data_copy = JSON.parse(JSON.stringify(data));
-          for (let i = 0; i < data_copy.length; i++) {
-            if (data_copy[i].poll_id == pollId) {
-              data_copy[i] = JSON.parse(JSON.stringify(temp[pollId]));
-              break;
+          setData((prevData) => {
+            let data_copy = JSON.parse(JSON.stringify(prevData));
+            for (let i = 0; i < data_copy.length; i++) {
+              if (data_copy[i].poll_id == pollId) {
+                data_copy[i] = JSON.parse(JSON.stringify(temp[pollId]));
+                break;
+              }
             }
-          }
-          setData(JSON.parse(JSON.stringify(data_copy)));
-          resolve(data_copy);
+            console.log(results);
+            return data_copy;
+          });
+          resolve("OK");
         })
         .catch(reject);
     });
