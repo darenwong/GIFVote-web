@@ -30,7 +30,7 @@ export default function VoteButton ({ text, option_id, user_id, poll_id }) {
       return;
     }
 
-    const result = await submitVote({ user_id: userId, poll_id, option_id });
+    //const result = await submitVote({ user_id: userId, poll_id, option_id });
   };
 
   return (

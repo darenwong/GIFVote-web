@@ -1,8 +1,14 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 const SQLContext = React.createContext();
-const ENDPOINT = "https://gif-vote.herokuapp.com";
-//const ENDPOINT = "http://localhost:8080";
+//const ENDPOINT = "https://gif-vote.herokuapp.com";
+const ENDPOINT = "http://localhost:8080";
 export function useSQL() {
   return useContext(SQLContext);
 }
@@ -49,6 +55,7 @@ export function SQLProvider({ children }) {
   const [httpError, setHttpError] = useState(initialErrorState);
 
   useEffect(() => {
+    console.log("data", data.length);
     if (data.length == 0) {
     }
   }, [data]);
@@ -147,17 +154,17 @@ export function SQLProvider({ children }) {
     });
   };
 
-  const clearHttpError = (error) => {
+  const clearHttpError = useCallback((error) => {
     setHttpError((prevState) => {
       return { ...prevState, [error]: { ...prevState[error], open: false } };
     });
-  };
+  }, []);
 
-  const activateHttpError = (error) => {
+  const activateHttpError = useCallback((error) => {
     setHttpError((prevState) => {
       return { ...prevState, [error]: { ...prevState[error], open: true } };
     });
-  };
+  }, []);
 
   const getDataset = ({ isPersonal, isFollowing }) => {
     return new Promise((resolve, reject) => {
@@ -290,119 +297,128 @@ export function SQLProvider({ children }) {
   };
 
   const refreshDataset = () => {
+    console.log("refreshed dataset");
     result.current = 0;
     setHasMore(true);
     setData([]);
   };
 
-  const updateDataset = (pollId) => {
-    return new Promise((resolve, reject) => {
-      clearHttpError("updateDataset");
-      fetch(`${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}`)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("updateDataset error");
-          }
-          return res.json();
-        })
-        .then((results) => {
-          let temp = {};
-          for (let i = 0; i < results.length; i++) {
-            let {
-              poll_id,
-              poll_text,
-              gifurl: gifURL,
-              gifimage,
-              gifheight: gifHeight,
-              gifwidth: gifWidth,
-              option_id,
-              option_name,
-              votecount: voteCount,
-              totalvotecount: totalVoteCount,
-              created_by,
-              user_id,
-              user_avatar,
-              created_at,
-              isvoted_bool: isVoted_bool,
-              isvoted_option_id: isVoted_option_id,
-              comment_count,
-              num_likes,
-              user_liked,
-            } = results[i];
-            if (!(poll_id in temp)) {
-              temp[poll_id] = {
-                poll_text,
+  const updateDataset = useCallback(
+    (pollId) => {
+      return new Promise((resolve, reject) => {
+        clearHttpError("updateDataset");
+        fetch(
+          `${ENDPOINT}/api-vote-update/?user_id=${userId}&poll_id=${pollId}`
+        )
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error("updateDataset error");
+            }
+            return res.json();
+          })
+          .then((results) => {
+            let temp = {};
+            for (let i = 0; i < results.length; i++) {
+              let {
                 poll_id,
-                gifURL,
+                poll_text,
+                gifurl: gifURL,
                 gifimage,
-                gifHeight,
-                gifWidth,
-                totalVoteCount,
+                gifheight: gifHeight,
+                gifwidth: gifWidth,
+                option_id,
+                option_name,
+                votecount: voteCount,
+                totalvotecount: totalVoteCount,
                 created_by,
                 user_id,
                 user_avatar,
                 created_at,
-                options: [],
-                isVoted_bool,
-                isVoted_option_id,
+                isvoted_bool: isVoted_bool,
+                isvoted_option_id: isVoted_option_id,
                 comment_count,
                 num_likes,
                 user_liked,
-                chartData: {
-                  labels: [],
-                  datasets: [
-                    {
-                      barThickness: 10,
-                      maxBarThickness: 10,
-                      label: "# of Votes",
-                      data: [],
-                      backgroundColor: [],
-                    },
-                  ],
-                },
-                voteData: [],
-              };
-            }
-            temp[poll_id].options.push({ option_id, option_name, voteCount });
+              } = results[i];
+              if (!(poll_id in temp)) {
+                temp[poll_id] = {
+                  poll_text,
+                  poll_id,
+                  gifURL,
+                  gifimage,
+                  gifHeight,
+                  gifWidth,
+                  totalVoteCount,
+                  created_by,
+                  user_id,
+                  user_avatar,
+                  created_at,
+                  options: [],
+                  isVoted_bool,
+                  isVoted_option_id,
+                  comment_count,
+                  num_likes,
+                  user_liked,
+                  chartData: {
+                    labels: [],
+                    datasets: [
+                      {
+                        barThickness: 10,
+                        maxBarThickness: 10,
+                        label: "# of Votes",
+                        data: [],
+                        backgroundColor: [],
+                      },
+                    ],
+                  },
+                  voteData: [],
+                };
+              }
+              temp[poll_id].options.push({ option_id, option_name, voteCount });
 
-            temp[poll_id].voteData.push({
-              option_id: option_id,
-              text: option_name,
-              votes: Number(voteCount),
-              backgroundColor:
-                isVoted_option_id == option_id
-                  ? "rgba(34, 191, 160, 1)"
-                  : "rgba(10, 10, 10, 0.5)",
-            });
-          }
-          let poll_keys = Object.keys(temp);
-          for (let i = 0; i < poll_keys.length; i++) {
-            let poll_id = poll_keys[i];
-            temp[poll_id].voteData.sort((a, b) => b.votes - a.votes);
-            temp[poll_id].voteData.map(({ text, votes, backgroundColor }) => {
-              temp[poll_id].chartData.labels.push(text);
-              temp[poll_id].chartData.datasets[0].data.push(votes);
-              temp[poll_id].chartData.datasets[0].backgroundColor.push(
-                backgroundColor
-              );
-            });
-          }
-
-          let data_copy = JSON.parse(JSON.stringify(data));
-          for (let i = 0; i < data_copy.length; i++) {
-            if (data_copy[i].poll_id == pollId) {
-              data_copy[i] = JSON.parse(JSON.stringify(temp[pollId]));
-              break;
+              temp[poll_id].voteData.push({
+                option_id: option_id,
+                text: option_name,
+                votes: Number(voteCount),
+                backgroundColor:
+                  isVoted_option_id == option_id
+                    ? "rgba(34, 191, 160, 1)"
+                    : "rgba(10, 10, 10, 0.5)",
+              });
             }
-          }
-          setData(JSON.parse(JSON.stringify(data_copy)));
-          resolve(data_copy);
-        })
-        .catch((error) => {
-          activateHttpError("updateDataset");
-        });
-    });
-  };
+            let poll_keys = Object.keys(temp);
+            for (let i = 0; i < poll_keys.length; i++) {
+              let poll_id = poll_keys[i];
+              temp[poll_id].voteData.sort((a, b) => b.votes - a.votes);
+              temp[poll_id].voteData.map(({ text, votes, backgroundColor }) => {
+                temp[poll_id].chartData.labels.push(text);
+                temp[poll_id].chartData.datasets[0].data.push(votes);
+                temp[poll_id].chartData.datasets[0].backgroundColor.push(
+                  backgroundColor
+                );
+              });
+            }
+
+            setData((prevData) => {
+              let data_copy = JSON.parse(JSON.stringify(prevData));
+              for (let i = 0; i < data_copy.length; i++) {
+                if (data_copy[i].poll_id == pollId) {
+                  data_copy[i] = JSON.parse(JSON.stringify(temp[pollId]));
+                  break;
+                }
+              }
+              console.log(results);
+              return data_copy;
+            });
+            resolve("OK");
+          })
+          .catch((error) => {
+            activateHttpError("updateDataset");
+          });
+      });
+    },
+    [clearHttpError, activateHttpError, userId]
+  );
 
   const handleFetchMoreData = () => {
     if (data.length < result.current) {
@@ -453,7 +469,7 @@ export function SQLProvider({ children }) {
     });
   };
 
-  const submitVote = ({ user_id, poll_id, option_id }) => {
+  const submitVote = useCallback(({ user_id, poll_id, option_id }) => {
     return new Promise((resolve, reject) => {
       clearHttpError("submitVote");
       fetch(
@@ -474,7 +490,7 @@ export function SQLProvider({ children }) {
           activateHttpError("submitVote");
         });
     });
-  };
+  }, []);
 
   const getComments = (poll_id) => {
     return new Promise((resolve, reject) => {
@@ -521,30 +537,33 @@ export function SQLProvider({ children }) {
     });
   };
 
-  const submitLike = ({ poll_id, user_id }) => {
-    return new Promise((resolve, reject) => {
-      clearHttpError("submitLike");
-      fetch(
-        `${ENDPOINT}/api-insert-like/?poll_id=${poll_id}&user_id=${user_id}`,
-        {
-          method: "POST",
-        }
-      )
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("submitLike error");
+  const submitLike = useCallback(
+    ({ poll_id, user_id }) => {
+      return new Promise((resolve, reject) => {
+        clearHttpError("submitLike");
+        fetch(
+          `${ENDPOINT}/api-insert-like/?poll_id=${poll_id}&user_id=${user_id}`,
+          {
+            method: "POST",
           }
-          return res.json();
-        })
-        .then((results) => {
-          updateDataset(poll_id);
-          resolve("OK");
-        })
-        .catch((error) => {
-          activateHttpError("submitLike");
-        });
-    });
-  };
+        )
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error("submitLike error");
+            }
+            return res.json();
+          })
+          .then((results) => {
+            updateDataset(poll_id);
+            resolve("OK");
+          })
+          .catch((error) => {
+            activateHttpError("submitLike");
+          });
+      });
+    },
+    [clearHttpError, activateHttpError, updateDataset]
+  );
 
   const submitPoll = ({ user_id, question, options }) => {
     return new Promise((resolve, reject) => {

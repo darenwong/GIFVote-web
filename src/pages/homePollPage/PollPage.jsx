@@ -1,7 +1,6 @@
 import { Button, Grid, Paper } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
-import { useSQL } from "../../contexts/SQLContext.js";
 import FlexListAPI from "./FlexListAPI.jsx";
 
 const useStyles = makeStyles((theme) => ({
@@ -19,17 +18,6 @@ const useStyles = makeStyles((theme) => ({
 
 function PollPage({ personal, sortBy, isFollowing }) {
   const classes = useStyles();
-  const {
-    data,
-    getUserData,
-    getDataset,
-    updateDataset,
-    refreshDataset,
-    handleFetchMoreData,
-    hasMore,
-    userId,
-    setSortBy,
-  } = useSQL();
 
   return (
     <div className={classes.root}>
