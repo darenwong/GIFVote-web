@@ -18,6 +18,11 @@ import { useSQL } from "../../contexts/SQLContext.js";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Link, useHistory } from "react-router-dom";
 import SignInPage from "../../components/SignInPage.js";
+import {    getUserProfile,
+  getUserFollowers,
+  getUserFollowing,
+  getUserNumPost} from "../../store/userSlice"
+import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -103,11 +108,6 @@ const useStyles = makeStyles((theme) => ({
 const ProfilePageList = ({ userProfileId }) => {
   const classes = useStyles();
   const {
-    getUserProfile,
-    getUserFollowers,
-    getUserFollowing,
-    getUserNumPost,
-    userId,
     submitFollow,
   } = useSQL();
   const { user, isAuthenticated } = useAuth0();
@@ -121,6 +121,9 @@ const ProfilePageList = ({ userProfileId }) => {
   const [numPost, setNumPost] = useState(0);
   const [open, setOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
+  const userId = useSelector(state => state.user.userId)
+
+
   useEffect(() => {
     refreshProfile();
   }, [userProfileId]);
