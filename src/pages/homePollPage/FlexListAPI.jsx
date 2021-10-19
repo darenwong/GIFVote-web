@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Row = ({ index, style, isScrolling, data }) => {
   const classes = useStyles();
-  const { hasMore } = useSQL();
+  const { hasMore, httpError } = useSQL();
   const history = useHistory();
 
   if (index == data.length && hasMore == false) {
@@ -66,12 +66,19 @@ const Row = ({ index, style, isScrolling, data }) => {
     return (
       <div style={{ ...style }} className={classes.loading}>
         <List>
-          <ListItem>
-            <ListItemIcon>
-              <CircularProgress />
-            </ListItemIcon>
-            <ListItemText primary="Loading..." />
-          </ListItem>
+          {httpError['getDataset'].open && 
+            <ListItem>
+              <ListItemText primary="Something Went Wrong" />
+            </ListItem>          
+          }
+          {!httpError['getDataset'].open && 
+            <ListItem>
+              <ListItemIcon>
+                <CircularProgress />
+              </ListItemIcon>
+              <ListItemText primary="Loading..." />
+            </ListItem>
+          }
         </List>
       </div>
     );

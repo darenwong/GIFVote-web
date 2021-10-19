@@ -15,6 +15,7 @@ import BotBar from "./components/topBar/BotBar";
 import SignInPage from "./components/SignInPage";
 import PollPage from "./pages/homePollPage/PollPage.jsx";
 import UserPollPage from "./pages/userPollPage/UserPollPage.jsx";
+import ErrorModal from "./components/error/ErrorModal.jsx";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const { isAuthenticated, user } = useAuth0();
-  const { getUserData, userId, setUserId } = useSQL();
+  const { getUserData, userId, setUserId, httpError } = useSQL();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
@@ -54,6 +55,11 @@ function App() {
     <Router>
       <div className={classes.root}>
         <TopBar />
+        {Object.keys(httpError).map((error) => {
+          if (error != "getDataset" && error != "getComments") {
+            return <ErrorModal key={error} error={error} />;
+          }
+        })}
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={6000}

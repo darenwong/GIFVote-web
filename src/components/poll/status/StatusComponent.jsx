@@ -57,14 +57,17 @@ export default function StatusComponent ({
   const [open, setOpen] = useState(false);
 
   const handleComment = async () => {
-    if (expanded == false) {
-      const results = await getComments(poll_id);
-      if (results) {
-        setComments(results);
-      }
-    }
-
     setExpanded(!expanded);
+
+    try{
+      if (expanded == false) {
+        const results = await getComments(poll_id);
+        if (results) {
+          setComments(results);
+        }
+      }
+    } catch {}
+
   };
 
   const handleSubmitComment = async (comment) => {
