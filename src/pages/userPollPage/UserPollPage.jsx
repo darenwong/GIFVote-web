@@ -1,8 +1,9 @@
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
-import { useSQL } from "../../contexts/SQLContext.js";
 import FlexListAPIPersonal from "./FlexListAPIPersonal.jsx";
 import { useLocation } from "react-router-dom";
+import { pollActions } from "../../store/pollSlice.js";
+import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,11 +24,11 @@ function useQuery() {
 }
 function UserPollPage({ personal, sortBy, isFollowing, userid }) {
   const classes = useStyles();
+  const dispatch = useDispatch();
   let query = useQuery();
-  const { refreshDataset } = useSQL();
 
   useEffect(() => {
-    refreshDataset();
+    dispatch(pollActions.refreshDataset());
   }, [query.get("user")]);
 
   return (

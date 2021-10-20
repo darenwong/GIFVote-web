@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { pollActions, getComments, submitComment } from "../../../store/pollSlice.js";
+import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Avatar,
@@ -11,7 +13,6 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import WhatshotIcon from "@material-ui/icons/Whatshot";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSQL } from "../../../contexts/SQLContext.js";
 import ChatBubbleOutlineIcon from "@material-ui/icons/ChatBubbleOutline";
 import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 import AccountCircle from "@material-ui/icons/AccountCircle";
@@ -53,7 +54,9 @@ export default function StatusComponent ({
   const [expanded, setExpanded] = useState(false);
   const [comments, setComments] = useState([]);
   const { isAuthenticated, user } = useAuth0();
-  const { getComments, submitComment, userId } = useSQL();
+  const userId = useSelector(state => state.user.userId);
+  const dispatch = useDispatch();
+
   const [open, setOpen] = useState(false);
 
   const handleComment = async () => {
@@ -61,7 +64,7 @@ export default function StatusComponent ({
 
     try{
       if (expanded == false) {
-        const results = await getComments(poll_id);
+        const results = await dispatch(getComments(poll_id));
         if (results) {
           setComments(results);
         }
@@ -76,9 +79,9 @@ export default function StatusComponent ({
       return;
     }
 
-    const response = await submitComment({ poll_id, user_id: userId, comment });
+    const response = await dispatch(submitComment({ poll_id, user_id: userId, comment }));
     if (response == "OK") {
-      const result = await getComments(poll_id);
+      const result = await dispatch(getComments(poll_id));
       if (result) {
         setComments(result);
       }

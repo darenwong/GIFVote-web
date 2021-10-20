@@ -9,7 +9,6 @@ import {
   ListItemAvatar,
 } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
-import { useSQL } from "../../../contexts/SQLContext";
 
 const useStyles = makeStyles((theme) => ({
   list: {

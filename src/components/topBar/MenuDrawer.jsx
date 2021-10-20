@@ -18,8 +18,7 @@ import { BiLogIn, BiLogOut } from "react-icons/bi";
 import SettingsIcon from "@material-ui/icons/Settings";
 import InfoIcon from "@material-ui/icons/Info";
 import FeedbackIcon from "@material-ui/icons/Feedback";
-import { useSQL } from "../../contexts/SQLContext";
-
+import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 
@@ -37,8 +36,7 @@ export default function MenuDrawer() {
   const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user, loginWithRedirect, logout } = useAuth0();
-  const { userId } = useSQL();
-
+  const userId = useSelector(state => state.user.userId)
   const history = useHistory();
 
   const handleLogOut = () =>{

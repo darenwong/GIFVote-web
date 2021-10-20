@@ -3,7 +3,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSQL } from "./contexts/SQLContext";
 import {
   BrowserRouter as Router,
   Switch,
@@ -31,7 +30,6 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const { isAuthenticated, user } = useAuth0();
-  //const { getUserData, userId, setUserId } = useSQL();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const httpError = useSelector((state) => state.error);
   const userId = useSelector((state) => state.user.userId);
@@ -41,14 +39,12 @@ function App() {
     const loggedInId = localStorage.getItem("userId");
 
     if (loggedInId) {
-      console.log("logged in", loggedInId);
       dispatch(userActions.setUserId(loggedInId));
     }
   }, []);
 
   useEffect(async () => {
     if (isAuthenticated) {
-      console.log("authenticated!", user);
       setSnackbarOpen(true);
 
       if (!localStorage.getItem("userId")) {

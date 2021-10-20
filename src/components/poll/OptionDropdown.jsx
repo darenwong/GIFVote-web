@@ -8,12 +8,13 @@ import {
   MenuItem,
   ListItemIcon,
 } from "@material-ui/core";
-import { useSQL } from "../../contexts/SQLContext.js";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ShareIcon from "@material-ui/icons/Share";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 import Delete from "@material-ui/icons/Delete";
 
+import { useDispatch, useSelector } from "react-redux";
+import { pollActions, submitDeletePoll } from "../../store/pollSlice.js";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,7 +28,8 @@ const useStyles = makeStyles((theme) => ({
 export default function OptionDropdown ({ user_id, poll_id }) {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
-  const { userId, submitDeletePoll, refreshDataset } = useSQL();
+  const userId = useSelector(state=>state.user.userId);
+  const dispatch = useDispatch();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -38,9 +40,9 @@ export default function OptionDropdown ({ user_id, poll_id }) {
   };
 
   const handleDeletePoll = ({ poll_id }) => {
-    submitDeletePoll({ poll_id })
+    dispatch(submitDeletePoll({ poll_id }))
       .then((res) => {
-        refreshDataset();
+        dispatch(pollActions.refreshDataset());
       })
       .catch(() => {});
   };

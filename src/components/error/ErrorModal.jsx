@@ -15,7 +15,6 @@ import {
   DialogContent,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import { useSQL } from "../../contexts/SQLContext";
 import ohnoGIF from "../../images/ohno.mp4";
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +44,6 @@ const useStyles = makeStyles((theme) => ({
 
 function ErrorModal({error}) {
   const classes = useStyles();
-  //const { httpError, clearHttpError } = useSQL();
   const dispatch = useDispatch();
 
   const httpError = useSelector((state) => state.error);
@@ -55,14 +53,6 @@ function ErrorModal({error}) {
 
   return (
     <div>
-      <video
-        width="60%"
-        height="auto"
-        style={{display:"none"}}
-        preload="auto"
-      >
-        <source src={ohnoGIF}/>
-      </video>
       <Dialog open={httpError[error].open} onClose={handleDismissHttpError} className={classes.root}>
         <DialogTitle disableTypography className={classes.title}>
           <Typography variant="h4" className={classes.titleText}>

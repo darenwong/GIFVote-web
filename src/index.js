@@ -7,7 +7,6 @@ import App from "./App";
 
 import reportWebVitals from "./reportWebVitals";
 import { Auth0Provider } from "@auth0/auth0-react";
-import { SQLProvider } from "./contexts/SQLContext";
 import { defaults } from "react-chartjs-2";
 
 import { Provider } from "react-redux";
@@ -47,11 +46,9 @@ ReactDOM.render(
       redirectUri={window.location.origin}
       cacheLocation="localstorage"
     >
-      <SQLProvider>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
-      </SQLProvider>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
     </Auth0Provider>
   </Provider>,
   document.getElementById("root")

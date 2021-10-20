@@ -14,15 +14,15 @@ import {
 } from "@material-ui/core";
 import { makeStyles, styled } from "@material-ui/core/styles";
 import { useEffect, useState, useRef } from "react";
-import { useSQL } from "../../contexts/SQLContext.js";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Link, useHistory } from "react-router-dom";
 import SignInPage from "../../components/SignInPage.js";
 import {    getUserProfile,
   getUserFollowers,
   getUserFollowing,
-  getUserNumPost} from "../../store/userSlice"
-import { useSelector } from "react-redux";
+  getUserNumPost} from "../../store/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { submitFollow } from "../../store/userSlice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -107,9 +107,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ProfilePageList = ({ userProfileId }) => {
   const classes = useStyles();
-  const {
-    submitFollow,
-  } = useSQL();
   const { user, isAuthenticated } = useAuth0();
   const [profile, setProfile] = useState({
     name: "",
@@ -121,15 +118,40 @@ const ProfilePageList = ({ userProfileId }) => {
   const [numPost, setNumPost] = useState(0);
   const [open, setOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
-  const userId = useSelector(state => state.user.userId)
-
+  const userId = useSelector(state => state.user.userId);
+  const dispatch = useDispatch();
+  const initial = useRef(true);
 
   useEffect(() => {
     refreshProfile();
   }, [userProfileId]);
 
+  useEffect(() => {
+    if (initial.current == true){
+      initial.current = false
+      return;
+    }
+
+    const timer = setTimeout(()=>{
+      console.log("submitted follow req")
+      dispatch(submitFollow({ 
+        follower_id: userId,
+        followee_id: userProfileId,
+        is_following: profile.is_following }))
+      .then(() => {
+        refreshProfile();
+      })
+      .catch(() => {});
+    }, 1000);
+
+    return ()=>{
+      console.log("CLEAN UP")
+      clearTimeout(timer);
+    }
+  }, [profile.is_following])
+
   const refreshProfile = () => {
-    getUserProfile({ user_id: userId, followee_id: userProfileId })
+    dispatch(getUserProfile({ user_id: userId, followee_id: userProfileId }))
       .then((res) => {
         if (res && res.length > 0) {
           setProfile({
@@ -140,21 +162,21 @@ const ProfilePageList = ({ userProfileId }) => {
         }
       })
       .catch(() => {});
-    getUserFollowers({ user_id: userId, followee_id: userProfileId })
+    dispatch(getUserFollowers({ user_id: userId, followee_id: userProfileId }))
       .then((res) => {
         if (res && res.length > 0) {
           setFollowers(res);
         }
       })
       .catch(() => {});
-    getUserFollowing({ user_id: userId, follower_id: userProfileId })
+    dispatch(getUserFollowing({ user_id: userId, follower_id: userProfileId }))
       .then((res) => {
         if (res && res.length > 0) {
           setFollowing(res);
         }
       })
       .catch(() => {});
-    getUserNumPost({ user_id: userProfileId })
+    dispatch(getUserNumPost({ user_id: userProfileId }))
       .then((res) => {
         if (res && res.length > 0) {
           setNumPost(res[0].numpost);
@@ -170,11 +192,12 @@ const ProfilePageList = ({ userProfileId }) => {
       return;
     }
 
-    submitFollow({ follower_id, followee_id })
-      .then(() => {
-        refreshProfile();
-      })
-      .catch(() => {});
+
+    setProfile((prevState) => {
+      return {...prevState, is_following: (prevState.is_following+1)%2}
+    })
+
+
   };
 
   const handleMessage = ({ from_id, to_id }) => {
