@@ -5,8 +5,8 @@ const initialUserState = {
   userId: "507",
 };
 
-//const ENDPOINT = "https://gif-vote.herokuapp.com";
-const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://gif-vote.herokuapp.com";
+//const ENDPOINT = "http://localhost:8080";
 
 const userSlice = createSlice({
   name: "user",
