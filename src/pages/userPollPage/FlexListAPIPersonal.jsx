@@ -12,12 +12,13 @@ import {
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import { VariableSizeList } from "react-window";
 import Poll from "../../components/poll/Poll";
-import { useSQL } from "../../contexts/SQLContext.js";
 import { useHistory } from "react-router-dom";
 import InfiniteLoader from "react-window-infinite-loader";
 import { useWindowSize } from "@react-hook/window-size/throttled";
 import AutoSizer from "react-virtualized-auto-sizer";
 import ProfilePageList from "./ProfilePageList";
+import { useDispatch, useSelector } from "react-redux";
+import { pollActions, handleFetchMoreDataPromise } from "../../store/pollSlice";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -42,7 +43,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Row = ({ index, style, isScrolling, data }) => {
   const classes = useStyles();
-  const { hasMore, httpError } = useSQL();
+  const httpError = useSelector(state=>state.error);
+  const hasMore = useSelector(state=>state.poll.hasMore);
   const history = useHistory();
 
   if (index == 0) {
@@ -149,18 +151,15 @@ const Row = ({ index, style, isScrolling, data }) => {
 };
 
 const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
-  const {
-    data,
-    refreshDataset,
-    handleFetchMoreDataPromise,
-    hasMore,
-  } = useSQL();
+  const data = useSelector(state=>state.poll.data);
+  const hasMore = useSelector(state=>state.poll.hasMore);
+  const dispatch = useDispatch();
   const [moreItemsLoading, setMoreItemsLoading] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [width, height] = useWindowSize();
 
   useEffect(() => {
-    refreshDataset();
+    dispatch(pollActions.refreshDataset());
   }, []);
 
   const getItemSize = (index) => {
@@ -188,16 +187,10 @@ const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
     if (stopIndex < data.length) {
       return;
     }
-    return new Promise((resolve) => {
-      handleFetchMoreDataPromise({
+    return dispatch(handleFetchMoreDataPromise({
         isPersonal: { state: personal, createdBy: userProfileId },
         isFollowing,
-      })
-        .then(() => {
-          resolve("OK");
-        })
-        .catch(() => {});
-    });
+      }))
   };
 
   return (
@@ -206,7 +199,7 @@ const FlexListAPIPersonal = ({ personal, userProfileId, isFollowing }) => {
         {({ height, width }) => (
           <InfiniteLoader
             isItemLoaded={(index) =>
-              index < data.length && data[index] !== null
+              index < data.length && data[index] !== null && false
             }
             itemCount={itemCount}
             loadMoreItems={loadMoreItems}

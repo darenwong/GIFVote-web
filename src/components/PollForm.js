@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { pollActions, submitPoll } from "../store/pollSlice";
+
 import { makeStyles } from "@material-ui/core/styles";
 import { Box, Button, CircularProgress, IconButton } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
@@ -13,7 +16,6 @@ import AddIcon from "@material-ui/icons/Add";
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import AddBoxIcon from "@material-ui/icons/AddBox";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSQL } from "../contexts/SQLContext.js";
 import { useHistory, useLocation } from "react-router-dom";
 import SignInPage from "./SignInPage.js";
 
@@ -50,9 +52,10 @@ export default function FormDialog() {
     { val: "", err: "" },
     { val: "", err: "" },
   ]);
+  const dispatch = useDispatch();
   const [question, setQuestion] = useState({ val: "", err: "" });
   const { loginWithRedirect, isAuthenticated } = useAuth0();
-  const { refreshDataset, submitPoll, userId } = useSQL();
+  const userId = useSelector((state) => state.user.userId);
   const history = useHistory();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const location = useLocation();
@@ -88,7 +91,6 @@ export default function FormDialog() {
     let temp = [...options];
     temp[index] = { val: event.target.value, err: "" };
     setOptions(temp);
-    //console.log(event.target.value, index);
   };
 
   const handleDeleteField = (event, index) => {
@@ -117,16 +119,19 @@ export default function FormDialog() {
       temp[i] = temp[i].val.trim();
     }
     setIsSubmitting(true);
-    const response = await submitPoll({
-      user_id: userId,
-      question: question.val.trim(),
-      options: JSON.stringify(temp),
-    });
+    const response = await dispatch(
+      submitPoll({
+        user_id: userId,
+        question: question.val.trim(),
+        options: JSON.stringify(temp),
+      })
+    );
+
     if (response == "OK") {
       //refreshDataset();
       handleClose();
       if (location.pathname == `/profile/${userId}`) {
-        refreshDataset();
+        dispatch(pollActions.refreshDataset());
       } else {
         history.push(`/profile/${userId}`);
       }

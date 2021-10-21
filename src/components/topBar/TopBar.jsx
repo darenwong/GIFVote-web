@@ -16,9 +16,8 @@ import PollForm from "../PollForm.js";
 import SignInPage from "../SignInPage.js";
 import MenuDrawer from "./MenuDrawer.jsx";
 
-import { useSQL } from "../../contexts/SQLContext";
 import { useAuth0 } from "@auth0/auth0-react";
-
+import { useSelector } from "react-redux";
 import { useHistory, useLocation } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -75,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
 export default function MenuAppBar() {
   const classes = useStyles();
   const { loginWithRedirect, isAuthenticated, user } = useAuth0();
-  const { userId } = useSQL();
+  const userId = useSelector(state=>state.user.userId)
   const [open, setOpen] = useState(false);
 
   const location = useLocation();

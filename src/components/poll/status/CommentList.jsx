@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from 'react-redux';
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Avatar,
@@ -8,7 +9,6 @@ import {
   ListItemAvatar,
 } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
-import { useSQL } from "../../../contexts/SQLContext";
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -22,8 +22,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CommentList ({ comments, getDate }) {
   const classes = useStyles();
-  const {httpError} = useSQL();
-
+  const httpError = useSelector(state=>state.error)
   return (
     <List className={classes.list} dense>
       {httpError['getComments'].open && 
