@@ -12,7 +12,7 @@ const ENDPOINT = "https://gif-vote.herokuapp.com";
 //const ENDPOINT = "http://localhost:8080";
 
 const pollSlice = createSlice({
-  name: "user",
+  name: "poll",
   initialState: initialUserState,
   reducers: {
     setData(state, action) {
@@ -225,6 +225,9 @@ const pollSlice = createSlice({
     increaseResult(state, action) {
       state.result += action.payload;
     },
+    decreaseResult(state, action) {
+      state.result -= action.payload;
+    },
     updateLike(state, action) {
       const pollId = action.payload.pollId;
       for (let i = 0; i < state.data.length; i++) {
@@ -308,20 +311,16 @@ export const updateDataset = (pollId) => {
 };
 
 export const handleFetchMoreDataPromise = ({ isPersonal, isFollowing }) => {
-  return async (dispatch) => {
-    /*if (data.length < result.current) {
-      reject("cancel fetch more data");
-    }*/
+  return async (dispatch, getState) => {
+    if (getState().poll.data.length < getState().poll.result) {
+      return;
+    }
     dispatch(pollActions.increaseResult(10));
-    dispatch(getDataset({ isPersonal, isFollowing }));
-    /*  .then(() => {
-        resolve("OK");
-      })
-      .catch(() => {
-        result.current -= 10;
-        console.log("fetch data failed");
-        reject("fetch data failed");
-      });*/
+    try {
+      dispatch(getDataset({ isPersonal, isFollowing }));
+    } catch (error) {
+      dispatch(pollActions.decreaseResult(10));
+    }
   };
 };
 
