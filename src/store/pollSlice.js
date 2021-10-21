@@ -119,7 +119,7 @@ const pollSlice = createSlice({
       }
 
       state.data = [...state.data, ...arr];
-
+      state.result = state.data.length;
       if (arr.length == 0) {
         state.hasMore = false;
       }
@@ -132,7 +132,6 @@ const pollSlice = createSlice({
     updateData(state, action) {
       let results = action.payload.results;
       let pollId = action.payload.pollId;
-      console.log("inside update data", results, pollId, action, state);
       let temp = {};
       for (let i = 0; i < results.length; i++) {
         let {
@@ -251,7 +250,6 @@ const pollSlice = createSlice({
 });
 
 export const getDataset = ({ isPersonal, isFollowing }) => {
-  console.log("getDataset");
   return async (dispatch, getState) => {
     dispatch(errorActions.clearHttpError("getDataset"));
 
