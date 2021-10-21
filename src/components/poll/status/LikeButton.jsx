@@ -1,13 +1,16 @@
 import React, { useState } from "react";
+import { pollActions, submitLike } from "../../../store/pollSlice.js";
+import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import {
   Button,
 } from "@material-ui/core";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSQL } from "../../../contexts/SQLContext.js";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import SignInPage from "../../SignInPage.js";
+import { useEffect } from "react";
+import { useRef } from "react";
 
 const useStyles = makeStyles((theme) => ({
   like: {
@@ -17,12 +20,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
 export default function LikeButton ({ user_liked, num_likes, poll_id }) {
   const classes = useStyles();
-  const { submitLike, userId } = useSQL();
+  const userId = useSelector(state => state.user.userId);
+  const dispatch = useDispatch();
   const { isAuthenticated } = useAuth0();
   const [open, setOpen] = useState(false);
+  const initial = useRef(true);
 
+  useEffect(()=>{
+    if (initial.current == true){
+      initial.current = false
+      return;
+    }
+
+    const timer = setTimeout(()=>{
+      dispatch(submitLike({ poll_id, user_id: userId, user_liked }));
+
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [user_liked])
 
   const handleLike = async () => {
     if (!isAuthenticated) {
@@ -30,7 +51,12 @@ export default function LikeButton ({ user_liked, num_likes, poll_id }) {
       return;
     }
 
-    const response = await submitLike({ poll_id, user_id: userId });
+    try {
+      dispatch(pollActions.updateLike({pollId:poll_id}));
+
+    }catch(error){
+      console.log("submitLike error", error)
+    }
   };
 
   return (

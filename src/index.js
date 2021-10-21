@@ -7,8 +7,10 @@ import App from "./App";
 
 import reportWebVitals from "./reportWebVitals";
 import { Auth0Provider } from "@auth0/auth0-react";
-import { SQLProvider } from "./contexts/SQLContext";
 import { defaults } from "react-chartjs-2";
+
+import { Provider } from "react-redux";
+import store from "./store/index";
 
 defaults.font.family = [
   "-apple-system",
@@ -37,18 +39,18 @@ const theme = createTheme({
 });
 
 ReactDOM.render(
-  <Auth0Provider
-    domain={domain}
-    clientId={clientId}
-    redirectUri={window.location.origin}
-    cacheLocation="localstorage"
-  >
-    <SQLProvider>
+  <Provider store={store}>
+    <Auth0Provider
+      domain={domain}
+      clientId={clientId}
+      redirectUri={window.location.origin}
+      cacheLocation="localstorage"
+    >
       <ThemeProvider theme={theme}>
         <App />
       </ThemeProvider>
-    </SQLProvider>
-  </Auth0Provider>,
+    </Auth0Provider>
+  </Provider>,
   document.getElementById("root")
 );
 

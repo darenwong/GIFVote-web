@@ -1,8 +1,8 @@
 import { Snackbar, Slide } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useSQL } from "./contexts/SQLContext";
 import {
   BrowserRouter as Router,
   Switch,
@@ -16,6 +16,7 @@ import SignInPage from "./components/SignInPage";
 import PollPage from "./pages/homePollPage/PollPage.jsx";
 import UserPollPage from "./pages/userPollPage/UserPollPage.jsx";
 import ErrorModal from "./components/error/ErrorModal.jsx";
+import { userActions, getUserData } from "./store/userSlice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,24 +30,25 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const { isAuthenticated, user } = useAuth0();
-  const { getUserData, userId, setUserId, httpError } = useSQL();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const httpError = useSelector((state) => state.error);
+  const userId = useSelector((state) => state.user.userId);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loggedInId = localStorage.getItem("userId");
 
     if (loggedInId) {
-      setUserId(loggedInId);
+      dispatch(userActions.setUserId(loggedInId));
     }
   }, []);
 
   useEffect(async () => {
     if (isAuthenticated) {
-      console.log("authenticated!", user);
       setSnackbarOpen(true);
 
       if (!localStorage.getItem("userId")) {
-        await getUserData(user);
+        dispatch(getUserData(user));
       }
     }
   }, [isAuthenticated]);
