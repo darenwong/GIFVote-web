@@ -114,6 +114,7 @@ const ProfilePageList = ({ userProfileId }) => {
     is_following: 0,
   });
   const [followers, setFollowers] = useState([]);
+  const [numFollowers, setNumFollowers] = useState(0);
   const [following, setFollowing] = useState([]);
   const [numPost, setNumPost] = useState(0);
   const [open, setOpen] = useState(false);
@@ -133,7 +134,6 @@ const ProfilePageList = ({ userProfileId }) => {
     }
 
     const timer = setTimeout(()=>{
-      console.log("submitted follow req")
       dispatch(submitFollow({ 
         follower_id: userId,
         followee_id: userProfileId,
@@ -145,10 +145,11 @@ const ProfilePageList = ({ userProfileId }) => {
     }, 1000);
 
     return ()=>{
-      console.log("CLEAN UP")
       clearTimeout(timer);
     }
   }, [profile.is_following])
+
+
 
   const refreshProfile = () => {
     dispatch(getUserProfile({ user_id: userId, followee_id: userProfileId }))
@@ -166,6 +167,7 @@ const ProfilePageList = ({ userProfileId }) => {
       .then((res) => {
         if (res && res.length > 0) {
           setFollowers(res);
+          setNumFollowers(res.length);
         }
       })
       .catch(() => {});
@@ -186,19 +188,30 @@ const ProfilePageList = ({ userProfileId }) => {
   };
 
 
-  const handleFollow = ({ follower_id, followee_id }) => {
+  const handleFollow = ({ follower_id, followee_id, is_following }) => {
     if (!isAuthenticated) {
       setOpen(true);
       return;
     }
 
-
-    setProfile((prevState) => {
-      return {...prevState, is_following: (prevState.is_following+1)%2}
-    })
-
-
-  };
+    if (followee_id == userProfileId){
+      setProfile((prevState) => {
+        setNumFollowers(prevNum => {
+          return (profile.is_following == 1) ? prevNum-1 : prevNum+1;
+        })
+        return {...prevState, is_following: (prevState.is_following+1)%2}
+      })
+    }else{
+      dispatch(submitFollow({ 
+        follower_id: follower_id,
+        followee_id: followee_id,
+        is_following: (is_following+1)%2 }))
+      .then(() => {
+        refreshProfile();
+      })
+      .catch(() => {});
+      }
+    };
 
   const handleMessage = ({ from_id, to_id }) => {
     if (!isAuthenticated) {
@@ -254,19 +267,22 @@ const ProfilePageList = ({ userProfileId }) => {
         <div className={classes.headerLeftContainer}>
           <div className={classes.summary}>
             <SummaryBox
-              data={numPost}
+              data={[]}
+              dataValue={numPost}
               unit={"Posts"}
               userId={userId}
               handleFollow={handleFollow}
             />
             <SummaryBox
               data={followers}
+              dataValue={numFollowers}
               unit={"Followers"}
               userId={userId}
               handleFollow={handleFollow}
             />
             <SummaryBox
               data={following}
+              dataValue={following.length}
               unit={"Following"}
               userId={userId}
               handleFollow={handleFollow}
@@ -314,7 +330,7 @@ const ProfilePageList = ({ userProfileId }) => {
 };
 export default ProfilePageList;
 
-const SummaryBox = ({ data, unit, handleFollow, userId }) => {
+const SummaryBox = ({ data, dataValue, unit, handleFollow, userId }) => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   let history = useHistory();
@@ -374,10 +390,12 @@ const SummaryBox = ({ data, unit, handleFollow, userId }) => {
                           ? handleFollow({
                               follower_id: userId,
                               followee_id: follower_id,
+                              is_following: user_is_following
                             })
                           : handleFollow({
                               follower_id: userId,
                               followee_id: followee_id,
+                              is_following: user_is_following
                             });
                       }}
                     >
@@ -397,7 +415,7 @@ const SummaryBox = ({ data, unit, handleFollow, userId }) => {
         }}
       >
         <Typography variant="subtitle1" style={{ fontWeight: 600 }}>
-          {unit == "Posts" ? data : data.length}
+          {dataValue}
         </Typography>
         <Typography variant="subtitle2">{unit}</Typography>
       </div>
